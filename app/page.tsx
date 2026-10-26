@@ -1,396 +1,297 @@
-"use client";
+import Link from "next/link";
+import "./site.css";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CaseFile, ExtractedField, TraceEntry } from "@/lib/agents/types";
-import type { RoutingDecision } from "@/lib/agents/graph";
-
-interface CaseMeta { id: string; label: string; blurb: string; demoRole: "clean" | "gaps" | "stop"; docs: number }
-
-const AGENT_ORDER = [
-  ["intake", "Intake & classification"],
-  ["extract", "Evidence extraction"],
-  ["terminology", "Terminology mapping"],
-  ["evidenceGraph", "Evidence graph"],
-  ["risk", "Risk prioritisation"],
-  ["completeness", "Completeness check"],
-  ["draft", "Narrative drafting"],
-  ["humanGate", "Qualified reviewer"],
-] as const;
-
-export default function Page() {
-  const [cases, setCases] = useState<CaseMeta[]>([]);
-  const [caseId, setCaseId] = useState<string>("");
-  const [file, setFile] = useState<CaseFile | null>(null);
-  const [trace, setTrace] = useState<TraceEntry[]>([]);
-  const [routing, setRouting] = useState<RoutingDecision | null>(null);
-  const [running, setRunning] = useState(false);
-  const [mode, setMode] = useState<"live" | "seeded">("seeded");
-  const [modelVersion, setModelVersion] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [edits, setEdits] = useState<Record<string, string>>({});
-  const [approved, setApproved] = useState(false);
-  const [uploadText, setUploadText] = useState("");
-  const traceEnd = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetch("/api/run")
-      .then((r) => r.json())
-      .then((d) => {
-        setCases(d.cases);
-        setCaseId(d.cases[0]?.id ?? "");
-        setMode(d.mode);
-        setModelVersion(d.modelVersion);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => { traceEnd.current?.scrollIntoView({ behavior: "smooth" }); }, [trace.length]);
-
-  const run = useCallback(async (payload: Record<string, unknown>) => {
-    setRunning(true); setTrace([]); setRouting(null); setFile(null);
-    setSelected(null); setEdits({}); setApproved(false);
-
-    const res = await fetch("/api/run", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const reader = res.body?.getReader();
-    if (!reader) { setRunning(false); return; }
-    const dec = new TextDecoder();
-    let buf = "";
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split("\n");
-      buf = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        const ev = JSON.parse(line);
-        if (ev.kind === "meta") { setMode(ev.mode); setModelVersion(ev.modelVersion); }
-        if (ev.kind === "step") {
-          setFile(ev.file);
-          setTrace((t) => [...t, ev.trace]);
-          await new Promise((r) => setTimeout(r, 320)); // let the reviewer watch it think
-        }
-        if (ev.kind === "routing") { setRouting(ev.routing); await new Promise((r) => setTimeout(r, 420)); }
-        if (ev.kind === "done") setFile(ev.file);
-      }
-    }
-    setRunning(false);
-  }, []);
-
-  const selField = useMemo(
-    () => file?.fields.find((f) => f.key === selected) ?? null,
-    [file, selected]
-  );
-
-  const sourceView = useMemo(() => {
-    if (!selField || !file) return null;
-    const c = selField.citations[0];
-    if (!c) return null;
-    const doc = file.documents.find((d) => d.id === c.docId);
-    const page = doc?.pages.find((p) => p.n === c.page);
-    if (!doc || !page) return null;
-    const idx = page.text.toLowerCase().indexOf(c.quote.slice(0, 40).toLowerCase());
-    return { title: doc.title, page: c.page, text: page.text, quote: c.quote, found: idx >= 0 };
-  }, [selField, file]);
-
-  const criticalGaps = file?.fields.filter((f) => f.status === "gap") ?? [];
-  const sourced = file?.fields.filter((f) => f.status === "sourced") ?? [];
-  const canApprove = !!file && !running && !approved;
-
-  function exportAudit() {
-    if (!file) return;
-    const payload = {
-      case: file.caseId,
-      generatedAt: new Date().toISOString(),
-      mode: file.mode,
-      modelVersion: file.modelVersion,
-      halted: file.halted,
-      haltReason: file.haltReason,
-      fields: file.fields.map((f) => ({ ...f, reviewerEdit: edits[f.key] ?? null })),
-      gaps: file.gaps,
-      conflicts: file.conflicts,
-      riskRank: file.riskRank,
-      narrative: file.narrative,
-      followUpQuery: file.followUpQuery,
-      approvals: approved ? [{ at: new Date().toISOString(), by: "demo reviewer", decision: file.halted ? "rejected" : "approved" }] : [],
-      trace: file.trace,
-      disclaimer: "Synthetic demonstration data. Not for clinical or regulatory use.",
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `SURE_audit_${file.caseId}.json`;
-    a.click();
-  }
-
+export default function Landing() {
   return (
     <>
-      <header className="hdr">
-        <div className="hdr-mark">SURE</div>
-        <div>
-          <h1>Safety Understanding, Risk &amp; Evidence</h1>
-          <div className="sub">Agentic ICSR case processing · Product Avengers · ABHIKALP 2026</div>
+      <nav className="nav">
+        <div className="nav-in">
+          <div className="logo">SURE</div>
+          <div className="wordmark">
+            SURE<span>Safety Understanding, Risk &amp; Evidence</span>
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
+            <a className="lnk" href="#problem">Problem</a>
+            <a className="lnk" href="#how">How it works</a>
+            <a className="lnk" href="#agents">Agents</a>
+            <a className="lnk" href="#evidence">Evidence</a>
+            <Link className="cta" href="/demo" style={{ marginLeft: 20 }}>Launch the demo</Link>
+          </div>
         </div>
-        <div className="spacer" />
-        <div className={`mode ${mode}`}>
-          {mode === "live" ? `Live · ${modelVersion}` : "Seeded · deterministic"}
+      </nav>
+
+      {/* ---------------- HERO ---------------- */}
+      <header className="hero">
+        <div className="site">
+          <div className="eyebrow">ABHIKALP 2026 · Case 6 · Healthcare &amp; Pharmaceuticals</div>
+          <h1>
+            Every fact in a safety report, <em>traceable to the page it came from.</em>
+          </h1>
+          <p className="lede">
+            SURE is an agentic workflow layer for pharmacovigilance case processing. Eight bounded
+            agents assemble an ICSR from fragmented source documents — and stop, visibly, wherever
+            the evidence runs out. A qualified reviewer still signs every case.
+          </p>
+          <div className="btns">
+            <Link className="cta lg" href="/demo">Launch the working demo →</Link>
+            <a className="cta lg ghost" href="#how">See how it works</a>
+          </div>
+          <p className="micro">
+            Three synthetic cases. One of them SURE refuses to draft — that is the one to watch.
+          </p>
+
+          <div className="stats">
+            <div className="stat-c">
+              <div className="n">300+ hrs</div>
+              <div className="l">Manual AE review, MedDRA coding &amp; synthesis per trial phase</div>
+              <div className="s">ABHIKALP 2026 case brief</div>
+            </div>
+            <div className="stat-c">
+              <div className="n">~2 Mn / yr</div>
+              <div className="l">AE, use-error &amp; product-complaint reports reaching the US FDA</div>
+              <div className="s">Oracle Health Sciences · ~40% serious</div>
+            </div>
+            <div className="stat-c">
+              <div className="n">$10.4 → $22.3B</div>
+              <div className="l">Global pharmacovigilance market, 2025 → 2034 · 8.88% CAGR</div>
+              <div className="s">Precedence Research, 2025</div>
+            </div>
+            <div className="stat-c">
+              <div className="n">10.9%</div>
+              <div className="l">APAC CAGR — fastest-growing region; India a primary PV outsourcing hub</div>
+              <div className="s">PvPI launched indigenous ADRMS, Aug 2024</div>
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className="banner">
-        All cases below are synthetic and fabricated for demonstration. No real patient data is used. Not for clinical or regulatory use.
-      </div>
+      {/* ---------------- PROBLEM ---------------- */}
+      <section className="band" id="problem">
+        <div className="site">
+          <div className="kicker">The problem</div>
+          <h2 className="sec">
+            Safety teams don’t spend their time writing. They spend it <em>reassembling a case from
+            documents that don’t agree.</em>
+          </h2>
+          <p className="sec">
+            One ICSR arrives as a physician note, a patient diary and a lab PDF — with no
+            machine-readable link between them. Five of the eight stages below are clerical
+            reconstruction. Only the last three are safety judgement.
+          </p>
 
-      <div className="grid">
-        {/* ------------------ LEFT ------------------ */}
-        <div className="col">
-          <div className="p">
-            <div className="p-h ink">Case bundles</div>
-            <div className="p-b">
-              {cases.map((c) => (
-                <button key={c.id} className={`case ${caseId === c.id ? "on" : ""}`} onClick={() => setCaseId(c.id)}>
-                  <div className="t">
-                    {c.label}
-                    <span className={`role ${c.demoRole}`}>{c.demoRole === "stop" ? "halts" : c.demoRole}</span>
-                  </div>
-                  <div className="b">{c.blurb}</div>
-                </button>
-              ))}
-              <button className="btn" disabled={running || !caseId} onClick={() => run({ caseId })}>
-                {running ? "Agents running…" : "Run the agent chain"}
-              </button>
+          <div className="chain">
+            {[
+              ["01", "Collect", "Evidence scattered across notes, diaries, lab PDFs, forms and email"],
+              ["02", "Extract", "Dates, products, doses and lab values buried in free text"],
+              ["03", "Reconcile", "Synonyms, duplicates, inconsistent dates, incomplete history"],
+              ["04", "Interpret", "Suspected product unclear; confounders unresolved"],
+              ["05", "Code", "MedDRA term choice varies by reviewer and dictionary version"],
+            ].map(([i, t, d]) => (
+              <div className="ch" key={i}>
+                <span className="i">{i}</span>
+                <div className="t">{t}</div>
+                <div className="d">{d}</div>
+              </div>
+            ))}
+            {[
+              ["06", "Assess", "Seriousness needs expert review — queues run FIFO, not by risk"],
+              ["07", "Draft", "Approved facts re-typed again into E2B(R3) fields"],
+              ["08", "Review", "Reviewer retraces every fact to its source before sign-off"],
+            ].map(([i, t, d]) => (
+              <div className="ch j" key={i}>
+                <span className="i">{i}</span>
+                <div className="t">{t}</div>
+                <div className="d">{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- HOW ---------------- */}
+      <section className="band alt" id="how">
+        <div className="site">
+          <div className="kicker">How it works</div>
+          <h2 className="sec">
+            One case, five agentic steps — and a human gate that <em>cannot be skipped.</em>
+          </h2>
+          <p className="sec">
+            The path through the graph depends on the state of the case. An unresolved critical
+            conflict means the drafting agent is never reached at all.
+          </p>
+
+          <div className="steps">
+            {[
+              ["01", "Ingest", "Case bundle imported. Source, timestamp, file identity and permissions recorded before anything is read.", "document inventory"],
+              ["02", "Extract & link", "Fields pulled with the exact source span kept. Every citation verified against the real page text.", "facts + source spans"],
+              ["03", "Reconcile", "Timeline and drug–event graph built. Contradictions surfaced, never guessed at.", "graph + open questions"],
+              ["04", "Rank & draft", "Queue ranked with stated reasons. Narrative written only from sourced facts.", "validated draft"],
+            ].map(([i, t, d, o]) => (
+              <div className="st" key={i}>
+                <div className="h"><i>{i}</i>{t}</div>
+                <div className="b"><p>{d}</p><div className="out">Hands off → {o}</div></div>
+              </div>
+            ))}
+            <div className="st stop">
+              <div className="h"><i>05</i>Human approve</div>
+              <div className="b">
+                <p>A qualified reviewer inspects each source, corrects, or leaves a field unknown. Every edit is versioned.</p>
+                <div className="out">SURE never submits to a regulator</div>
+              </div>
             </div>
           </div>
 
-          <div className="p">
-            <div className="p-h ink">Or paste your own source</div>
-            <div className="p-b">
-              <textarea
-                rows={6}
-                placeholder="Paste a physician note, patient diary or lab report here…"
-                value={uploadText}
-                onChange={(e) => setUploadText(e.target.value)}
-              />
-              <button
-                className="btn ghost"
-                style={{ marginTop: 8 }}
-                disabled={running || uploadText.trim().length < 40}
-                onClick={() => run({ uploaded: [{ title: "Pasted document", kind: "physician_note", text: uploadText }] })}
-              >
-                Run on pasted text
-              </button>
-              <p className="note" style={{ marginTop: 8 }}>
-                Uploaded text has no reference answer, so accuracy is not scored for that run.
+          <div className="cards">
+            <div className="card key">
+              <span className="tag">The control that matters</span>
+              <h3>Citations are verified, not trusted</h3>
+              <p>
+                Every quoted span is checked against the page it claims to come from. A field whose
+                citation fails verification has its value <b>thrown away</b> and is downgraded to a
+                gap. That is the mechanism behind traceability — a mechanical check, not a prompt
+                instruction.
+              </p>
+            </div>
+            <div className="card">
+              <span className="tag">Gaps stay visible</span>
+              <h3>Unknown stays unknown</h3>
+              <p>
+                No value is ever invented to make a form look complete. Missing and contradictory
+                fields are recorded in a gap ledger, and a follow-up query is drafted — drafted,
+                never answered.
+              </p>
+            </div>
+            <div className="card">
+              <span className="tag">Bounded authority</span>
+              <h3>Agentic in workflow, not in judgement</h3>
+              <p>
+                SURE coordinates extraction, reconciliation, validation and drafting. It does not
+                decide causality, does not decide seriousness, and cannot submit anything anywhere.
               </p>
             </div>
           </div>
-
-          {sourceView && (
-            <div className="p">
-              <div className="p-h">Source trail</div>
-              <div className="p-b">
-                <div className="src-h">{sourceView.title} · page {sourceView.page}</div>
-                <div className="src">
-                  {sourceView.found
-                    ? highlight(sourceView.text, sourceView.quote)
-                    : sourceView.text}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
+      </section>
 
-        {/* ------------------ CENTRE ------------------ */}
-        <div className="col">
-          {file?.halted && (
-            <div className="halt">
-              <div className="t">⛔ Chain halted at “{file.haltAgent}” — no narrative produced</div>
-              <div className="m">{file.haltReason}</div>
-            </div>
-          )}
+      {/* ---------------- AGENTS ---------------- */}
+      <section className="band" id="agents">
+        <div className="site">
+          <div className="kicker">Agentic architecture</div>
+          <h2 className="sec">Eight agents. Each one with a <em>hard stop.</em></h2>
+          <p className="sec">
+            Every boundary below is enforced in code and surfaced in the live trace on each run.
+          </p>
 
-          <div className="p">
-            <div className="p-h">
-              Case file
-              {file?.riskRank && (
-                <span className={`pill ${file.riskRank.level}`} style={{ marginLeft: "auto" }}>
-                  {file.riskRank.level}
-                </span>
-              )}
-            </div>
-            {file ? (
-              <>
-                <div style={{ padding: "8px 12px", fontSize: 11, color: "var(--slate)", borderBottom: "1px solid var(--rule-soft)" }}>
-                  <b>{sourced.length}</b> of {file.fields.length} fields sourced · <b>{criticalGaps.length}</b> open gap(s) ·{" "}
-                  <b>{file.conflicts.length}</b> conflict(s) — click any field to see where it came from
-                </div>
-                {file.fields.map((f) => (
-                  <FieldRow
-                    key={f.key}
-                    f={f}
-                    selected={selected === f.key}
-                    edit={edits[f.key]}
-                    onSelect={() => setSelected(selected === f.key ? null : f.key)}
-                    onEdit={(v) => setEdits((e) => ({ ...e, [f.key]: v }))}
-                  />
-                ))}
-              </>
-            ) : (
-              <div className="p-b"><p className="note">Pick a case and run the chain.</p></div>
-            )}
+          <table className="ag">
+            <thead><tr><th>Agent</th><th>What it is permitted to do</th><th>Where it must stop</th></tr></thead>
+            <tbody>
+              {[
+                ["Intake & classification", "Identifies file types, splits bundles, flags unreadable pages", "Draws no clinical inference at intake"],
+                ["Evidence extraction", "Pulls fields, dates, products, doses and outcomes with source spans", "Preserves original text and units; an unverifiable citation is discarded"],
+                ["Terminology mapping", "Proposes MedDRA and product codes, version recorded", "Cannot overwrite source wording; a human confirms every code"],
+                ["Evidence graph", "Links timeline, medication history and lab findings; marks conflicts", "Labels links documented / candidate / unresolved — never causal"],
+                ["Risk prioritisation", "Ranks the review queue and states the reason for each rank", "Cannot suppress a case subject to mandatory review"],
+                ["Completeness check", "Validates required fields, date order, units, duplicates", "Unknown stays unknown — no value invented to pass a check"],
+                ["Narrative drafting", "Assembles the narrative and structured fields from approved facts", "No unsupported claim; halts on a critical conflict; cannot submit"],
+              ].map(([n, d, s]) => (
+                <tr key={n}><td className="nm">{n}</td><td>{d}</td><td className="stop">{s}</td></tr>
+              ))}
+              <tr className="human">
+                <td className="nm">Qualified reviewer</td>
+                <td>Confirms, corrects, rejects, requests follow-up, approves</td>
+                <td className="stop">Final clinical and regulatory judgement remains human-owned</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ---------------- EVIDENCE ---------------- */}
+      <section className="band alt" id="evidence">
+        <div className="site">
+          <div className="kicker">Research grounding</div>
+          <h2 className="sec">
+            Components proven separately. <em>The chain is what we still have to prove.</em>
+          </h2>
+          <p className="sec">
+            SURE is built on published work — and on an honest reading of what that work does and
+            does not establish. These are each study’s results in each study’s setting. None of them
+            is SURE’s performance.
+          </p>
+
+          <div className="ev">
+            {[
+              ["44.4–95.8%", "PPV range across four monitored ADE types, 10 institutions", "Chen et al., 2020", "Take: configurable rule triggers, each alert carrying its reason. Refuse: treating an alert as a confirmed ADR."],
+              ["91.1 → 86.3", "F1 in-house vs external site — deep learning + drug knowledge graph", "Feng et al., 2023", "Take: graph linking of drug–event pairs. Refuse: assuming performance transfers between sites."],
+              ["AUC 0.707", "Severe-ADR prediction · 508 SADRs · dual-centre cohort", "Bu et al., 2025", "Take: a transparent risk score as a queue aid. Refuse: moderate discrimination posing as judgement."],
+              ["160 vs 50", "ADRs found by active monitoring vs spontaneous reporting · 4.2 vs 10.7 days", "Jing et al., 2026", "Take: active monitoring as a later phase. Refuse: assuming hospital integration in the MVP."],
+            ].map(([n, w, p, t]) => (
+              <div className="evc" key={p}>
+                <div className="n">{n}</div>
+                <div className="w">{w}</div>
+                <div className="p">{p}</div>
+                <div className="t">{t}</div>
+              </div>
+            ))}
           </div>
 
-          {file?.followUpQuery && (
-            <div className="p">
-              <div className="p-h amber">Follow-up query — drafted, not answered</div>
-              <div className="p-b"><div className="q-box">{file.followUpQuery}</div></div>
-            </div>
-          )}
-
-          {file?.narrative && (
-            <div className="p">
-              <div className="p-h">ICSR narrative draft</div>
-              <div className="p-b">
-                <div className="draft">{file.narrative}</div>
-                <p className="note" style={{ marginTop: 8 }}>
-                  Built only from fields marked <b>Sourced</b>. Unresolved items are described as not stated, never filled in.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ------------------ RIGHT ------------------ */}
-        <div className="col">
-          <div className="p">
-            <div className="p-h violet">Agent trace &amp; audit log</div>
-            <div className="p-b">
-              {trace.length === 0 && !running && <p className="note">The trace appears here as each agent runs.</p>}
-              {AGENT_ORDER.map(([key, label], i) => {
-                const t = trace.find((x) => x.agent === key);
-                const isNext = !t && running && trace.length === i;
-                if (!t && !isNext) return null;
-                return (
-                  <div key={key}>
-                    {key === "draft" && routing && (
-                      <div className="route">
-                        <div className="q">Routing decision · {routing.condition}</div>
-                        <div className="a">→ {routing.chose}</div>
-                        <div className="w">{routing.because}</div>
-                      </div>
-                    )}
-                    <div className={`tr ${t?.stopTriggered ? "stop" : isNext ? "run" : ""}`}>
-                      <div className="n">{t ? `${t.seq}. ${t.agentLabel}` : `${i + 1}. ${label}…`}</div>
-                      {t && (
-                        <>
-                          <div className="s">{t.summary}</div>
-                          {t.toolCalls.map((tc, j) => (
-                            <div className="tool" key={j}>↳ {tc.tool}({tc.input}) → {tc.output}</div>
-                          ))}
-                          <div className="meta">
-                            {t.durationMs} ms{t.modelVersion ? ` · ${t.modelVersion}` : " · deterministic"}
-                          </div>
-                          <div className="stopc">STOP CONDITION {t.stopTriggered ? "— TRIGGERED" : "checked"}: {t.stopConditionChecked}</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={traceEnd} />
-            </div>
+          <div className="honest">
+            <h3>What SURE does not do</h3>
+            <ul>
+              <li>Decide whether a drug caused an event</li>
+              <li>Decide seriousness or severity</li>
+              <li>Submit anything to a regulator</li>
+              <li>Fill a missing field with a plausible value</li>
+              <li className="do">Links every material field to its source passage</li>
+              <li className="do">Keeps every gap and contradiction visible</li>
+              <li className="do">Versions every reviewer correction</li>
+              <li className="do">Halts and escalates when evidence conflicts</li>
+            </ul>
           </div>
-
-          {file && !running && (
-            <div className="p">
-              <div className="p-h ink">Human decision</div>
-              <div className="p-b">
-                {approved ? (
-                  <p className="note">
-                    <b>Recorded.</b> {file.halted ? "Case escalated for adjudication." : "Case approved by reviewer."} The decision is in the audit export.
-                  </p>
-                ) : (
-                  <>
-                    <p className="note" style={{ marginBottom: 9 }}>
-                      {file.halted
-                        ? "SURE refused to draft this case. A qualified reviewer must adjudicate the conflict before processing continues."
-                        : "Nothing can be exported until a qualified reviewer signs off. SURE never submits to a regulator."}
-                    </p>
-                    <div style={{ display: "flex", gap: 7 }}>
-                      <button className={`btn ${file.halted ? "danger" : "ok"}`} disabled={!canApprove} onClick={() => setApproved(true)}>
-                        {file.halted ? "Acknowledge escalation" : "Approve case"}
-                      </button>
-                    </div>
-                  </>
-                )}
-                <button className="btn ghost" style={{ marginTop: 8 }} onClick={exportAudit}>
-                  Export audit trail (JSON)
-                </button>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-    </>
-  );
-}
+      </section>
 
-function FieldRow({
-  f, selected, edit, onSelect, onEdit,
-}: {
-  f: ExtractedField; selected: boolean; edit?: string;
-  onSelect: () => void; onEdit: (v: string) => void;
-}) {
-  const shown = edit ?? f.value;
-  return (
-    <>
-      <div className={`f ${selected ? "sel" : ""}`} onClick={onSelect}>
-        <div className="k">{f.label}</div>
-        <div className="v">
-          <span className={shown ? (f.status === "gap" ? "amber" : "") : "none"}>
-            {shown ?? (f.candidates?.length ? "unresolved" : "not stated")}
-          </span>
-          {f.candidates?.length ? (
-            <div className="cands">candidates: {f.candidates.join("  ·  ")}</div>
-          ) : null}
-          {f.citations[0] && (
-            <div className="cite">
-              ↳ {f.citations[0].docTitle}, p.{f.citations[0].page}
-              {f.citations[0].verified && " · citation verified"}
-            </div>
-          )}
-          {edit && <div className="cite" style={{ color: "var(--blue)" }}>↳ corrected by reviewer (original preserved in audit)</div>}
+      {/* ---------------- RESULTS ---------------- */}
+      <section className="band">
+        <div className="site">
+          <div className="kicker">Measured, not asserted</div>
+          <h2 className="sec">Current results on <em>three synthetic cases.</em></h2>
+          <p className="sec">
+            Run the evaluation harness yourself with <code>python3 eval/run_eval.py</code>. The
+            extractor was developed against these same three cases, so critical-field accuracy here
+            is a tuned result, not a validated one — held-out evaluation is the Week 6–7 pilot gate.
+          </p>
+          <div className="results">
+            <div className="res"><div className="n">15/15</div><div className="l">Critical fields correct</div></div>
+            <div className="res"><div className="n">0 / 22</div><div className="l">Unsupported claims among asserted values</div></div>
+            <div className="res"><div className="n">5 / 7</div><div className="l">Gaps correctly identified</div></div>
+            <div className="res"><div className="n">3 / 3</div><div className="l">Escalation decisions correct</div></div>
+          </div>
+          <div style={{ marginTop: 30 }}>
+            <Link className="cta lg" href="/demo">Try it on the three cases →</Link>
+          </div>
         </div>
-        <span className={`badge ${f.status}`}>{f.status}</span>
-      </div>
-      {selected && (
-        <div style={{ padding: "0 12px 10px 131px" }} onClick={(e) => e.stopPropagation()}>
-          <input
-            type="text"
-            placeholder="Correct this field…"
-            value={edit ?? ""}
-            onChange={(e) => onEdit(e.target.value)}
-          />
-        </div>
-      )}
-    </>
-  );
-}
+      </section>
 
-function highlight(text: string, quote: string) {
-  const probe = quote.slice(0, 60);
-  const i = text.toLowerCase().indexOf(probe.toLowerCase());
-  if (i < 0) return text;
-  const end = Math.min(text.length, i + quote.length);
-  return (
-    <>
-      {text.slice(0, i)}
-      <span className="hl">{text.slice(i, end)}</span>
-      {text.slice(end)}
+      <footer className="foot">
+        <div className="site">
+          <div className="warn">
+            All case data is synthetic and fabricated for demonstration. No real patient data is
+            used anywhere in this product. Not for clinical or regulatory use.
+          </div>
+          <p>
+            <b>SURE — Safety Understanding, Risk &amp; Evidence.</b> Built for ABHIKALP 2026,
+            Case 6: Healthcare &amp; Pharmaceuticals.
+          </p>
+          <p style={{ marginTop: 6 }}>
+            <b>Team Product Avengers</b> — Vaishnavi Tyagi · Gautam Jharwal · Sanhita Mahtre · Tanmya Pol
+          </p>
+          <p style={{ marginTop: 14, fontSize: 11 }}>
+            70% drafting-time reduction and 100% clinical data accuracy are targets stated in the
+            case brief. They are not results demonstrated by this prototype.
+          </p>
+        </div>
+      </footer>
     </>
   );
 }
