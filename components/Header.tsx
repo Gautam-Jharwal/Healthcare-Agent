@@ -7,7 +7,7 @@ type Health = { provider: string | null; ok: boolean | null; model?: string | nu
 
 export type RunMode = { mode: "live" | "degraded" | "seeded" | "mock"; model: string | null } | null;
 
-export default function Header({ current, runMode }: { current: "home" | "demo" | "eval" | "study"; runMode?: RunMode }) {
+export default function Header({ current, runMode }: { current: "home" | "overview" | "demo" | "eval" | "study"; runMode?: RunMode }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [theme, setTheme] = useState<string | null>(null);
 
@@ -44,8 +44,9 @@ export default function Header({ current, runMode }: { current: "home" | "demo" 
   }
 
   const nav: [string, string, typeof current][] = [
-    ["/", "Overview", "home"],
-    ["/demo", "Workbench", "demo"],
+    ["/", "Home", "home"],
+    ["/overview", "Overview", "overview"],
+    ["/demo", "Analysis", "demo"],
     ["/eval", "Evaluation", "eval"],
     ["/study", "Time study", "study"],
   ];
