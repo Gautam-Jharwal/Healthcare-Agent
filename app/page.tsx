@@ -1,297 +1,219 @@
 import Link from "next/link";
+import Header from "@/components/Header";
+import { PipelineReplay } from "@/components/Pipeline";
+import { CASES } from "@/lib/cases";
+import { runGraphToEnd } from "@/lib/engine/graph";
+import { scoreCase, totals, type CaseScore } from "@/lib/engine/score";
 import "./site.css";
 
-export default function Landing() {
+/** Numbers on this page come from a real run of the agent graph at build time (rules only). */
+async function seededResults() {
+  const scores: CaseScore[] = [];
+  for (const c of CASES.filter((x) => x.reference)) {
+    const f = await runGraphToEnd(c, {}, { seeded: true });
+    scores.push(scoreCase(c, f)!);
+  }
+  return { core: totals(scores.filter((s) => s.set === "core")), stress: totals(scores.filter((s) => s.set === "stress")), heldout: totals(scores.filter((s) => s.set === "heldout")) };
+}
+
+const STAGES = [
+  ["Collect", "Notes, diaries, lab PDFs, forms and email arrive separately"],
+  ["Extract", "Dates, products, doses and lab values sit in free text"],
+  ["Reconcile", "Sources disagree; duplicates and follow-ups arrive later"],
+  ["Interpret", "The suspect product is unclear; confounders are unresolved"],
+  ["Code", "Term choice varies by reviewer and dictionary version"],
+  ["Assess", "Seriousness needs an expert; queues run first in, first out"],
+  ["Draft", "Approved facts are re-typed into E2B(R3) fields and narrative"],
+  ["Review", "The reviewer retraces every fact to its source before sign-off"],
+];
+
+const CONTROLS: [string, string][] = [
+  ["Citations are verified against the page", "A quote must be found on the page it names. Unreadable pages cannot be cited. A value whose citation fails is thrown away, not shown."],
+  ["The value must be inside its quote", "A real quote attached to an invented number fails: every number and date in a value has to appear in the quoted text."],
+  ["Two independent readers", "A rule-based reader and the model read the same documents. If they disagree on a critical field, a human decides, the way double data entry works in clinical data management."],
+  ["One self-correction, then discard", "Citations that fail are sent back to the model once, with the reason. Anything still unverified is dropped."],
+  ["Every narrative claim is checked", "Each date, quantity, product and outcome word in the draft must trace to a verified field. Causal language is rejected outright. A failed draft is redrafted once, then replaced by a verified template."],
+  ["Instructions inside documents are quarantined", "A line that tries to instruct the AI is withheld from the model and cannot be cited. It is shown struck through to the reviewer."],
+  ["Personal identifiers are redacted first", "Phone, Aadhaar-like, PAN-like numbers and email addresses are masked in the interface and removed before any model call."],
+  ["Validity and the clock are explicit", "The four ICSR minimum criteria are checked; an invalid case is held, not drafted. The ICH E2A clock is shown with its condition: SURE assesses neither expectedness nor causality."],
+  ["Hash-chained audit, gated export", "Every run and reviewer decision is chained by SHA-256. Export is keyed by E2B(R3) element IDs and is only available after a named reviewer approves."],
+];
+
+const AGENTS: [string, string, string][] = [
+  ["Intake", "Inventories documents, flags unreadable pages, quarantines instruction-like text, finds personal identifiers", "No clinical inference"],
+  ["Evidence extraction", "Routes lab tables to a parser and narrative to two readers; verifies, cross-checks and self-corrects", "No value without a verified citation that contains it"],
+  ["Reviewer decisions", "Applies adjudications and corrections made by a named reviewer, then re-derives dependent fields", "Never overrides silently; a reason is required"],
+  ["Terminology", "Proposes a coded term from a dictionary, or a labelled model suggestion", "Cannot overwrite source wording; a coder confirms"],
+  ["Evidence graph", "Links products, events, onset and labs; detects conflicts; searches the case library for follow-ups", "Links are documented, candidate or unresolved, never causal"],
+  ["Risk", "Applies named lab rules (severe thrombocytopenia, Hy’s law) and recorded seriousness; computes the reporting clock", "Cannot suppress a case or decide seriousness"],
+  ["Completeness", "Checks the four minimum criteria and every field; drafts the follow-up query and reporter letter", "Unknown stays unknown"],
+  ["Narrative drafting", "Writes the narrative from verified facts and checks every claim", "Halts on a critical conflict or an invalid case; cannot submit"],
+  ["Qualified reviewer", "Adjudicates, corrects, approves or rejects; downloads the export", "Final clinical and regulatory judgement is human"],
+];
+
+export default async function Home() {
+  const r = await seededResults();
   return (
     <>
-      <nav className="nav">
-        <div className="nav-in">
-          <div className="logo">SURE</div>
-          <div className="wordmark">
-            SURE<span>Safety Understanding, Risk &amp; Evidence</span>
-          </div>
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center" }}>
-            <a className="lnk" href="#problem">Problem</a>
-            <a className="lnk" href="#how">How it works</a>
-            <a className="lnk" href="#agents">Agents</a>
-            <a className="lnk" href="#evidence">Evidence</a>
-            <Link className="cta" href="/demo" style={{ marginLeft: 20 }}>Launch the demo</Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* ---------------- HERO ---------------- */}
-      <header className="hero">
-        <div className="site">
-          <div className="eyebrow">ABHIKALP 2026 · Case 6 · Healthcare &amp; Pharmaceuticals</div>
-          <h1>
-            Every fact in a safety report, <em>traceable to the page it came from.</em>
-          </h1>
-          <p className="lede">
-            SURE is an agentic workflow layer for pharmacovigilance case processing. Eight bounded
-            agents assemble an ICSR from fragmented source documents — and stop, visibly, wherever
-            the evidence runs out. A qualified reviewer still signs every case.
+      <Header current="home" />
+      <main className="site">
+        <section className="hero">
+          <p className="kicker">ABHIKALP 2026, Case 6: Healthcare &amp; Pharmaceuticals. Team Product Avengers.</p>
+          <h1>Every fact in a safety report, traceable to the page it came from.</h1>
+          <p className="hero-sub">
+            SURE is an agentic workflow for pharmacovigilance case processing. Bounded agents assemble an Individual Case Safety Report from physician notes, patient diaries and lab reports, check every citation against the page, and stop, visibly, where the evidence runs out. A qualified reviewer signs every case.
           </p>
-          <div className="btns">
-            <Link className="cta lg" href="/demo">Launch the working demo →</Link>
-            <a className="cta lg ghost" href="#how">See how it works</a>
+          <div className="hero-cta">
+            <Link className="btn primary" href="/demo">Open the workbench</Link>
+            <Link className="btn" href="/eval">See the evaluation</Link>
           </div>
-          <p className="micro">
-            Three synthetic cases. One of them SURE refuses to draft — that is the one to watch.
-          </p>
+        </section>
 
-          <div className="stats">
-            <div className="stat-c">
-              <div className="n">300+ hrs</div>
-              <div className="l">Manual AE review, MedDRA coding &amp; synthesis per trial phase</div>
-              <div className="s">ABHIKALP 2026 case brief</div>
-            </div>
-            <div className="stat-c">
-              <div className="n">~2 Mn / yr</div>
-              <div className="l">AE, use-error &amp; product-complaint reports reaching the US FDA</div>
-              <div className="s">Oracle Health Sciences · ~40% serious</div>
-            </div>
-            <div className="stat-c">
-              <div className="n">$10.4 → $22.3B</div>
-              <div className="l">Global pharmacovigilance market, 2025 → 2034 · 8.88% CAGR</div>
-              <div className="s">Precedence Research, 2025</div>
-            </div>
-            <div className="stat-c">
-              <div className="n">10.9%</div>
-              <div className="l">APAC CAGR — fastest-growing region; India a primary PV outsourcing hub</div>
-              <div className="s">PvPI launched indigenous ADRMS, Aug 2024</div>
-            </div>
+        <figure className="replay">
+          <PipelineReplay />
+          <figcaption>Replay of case IN-2026-0433. The clinician records onset on 3 April; the patient diary shows symptoms from 26 March. The route agent escalates instead of drafting, and the reviewer adjudicates before the chain resumes.</figcaption>
+        </figure>
+
+        <section className="band">
+          <div className="band-head">
+            <h2>Safety teams spend their time rebuilding the case, not judging it</h2>
+            <p>One ICSR arrives as a physician note, a patient diary and a lab PDF with no machine-readable link between them. Five of the eight stages are clerical reconstruction. SURE automates those five and stops at the three that need a qualified person.</p>
           </div>
-        </div>
-      </header>
-
-      {/* ---------------- PROBLEM ---------------- */}
-      <section className="band" id="problem">
-        <div className="site">
-          <div className="kicker">The problem</div>
-          <h2 className="sec">
-            Safety teams don’t spend their time writing. They spend it <em>reassembling a case from
-            documents that don’t agree.</em>
-          </h2>
-          <p className="sec">
-            One ICSR arrives as a physician note, a patient diary and a lab PDF — with no
-            machine-readable link between them. Five of the eight stages below are clerical
-            reconstruction. Only the last three are safety judgement.
-          </p>
-
-          <div className="chain">
-            {[
-              ["01", "Collect", "Evidence scattered across notes, diaries, lab PDFs, forms and email"],
-              ["02", "Extract", "Dates, products, doses and lab values buried in free text"],
-              ["03", "Reconcile", "Synonyms, duplicates, inconsistent dates, incomplete history"],
-              ["04", "Interpret", "Suspected product unclear; confounders unresolved"],
-              ["05", "Code", "MedDRA term choice varies by reviewer and dictionary version"],
-            ].map(([i, t, d]) => (
-              <div className="ch" key={i}>
-                <span className="i">{i}</span>
-                <div className="t">{t}</div>
-                <div className="d">{d}</div>
-              </div>
+          <ol className="stages">
+            {STAGES.map(([t, d], i) => (
+              <li key={t} className={i < 5 ? "auto" : "human"}>
+                <span className="n">{i + 1}</span>
+                <b>{t}</b>
+                <span>{d}</span>
+              </li>
             ))}
-            {[
-              ["06", "Assess", "Seriousness needs expert review — queues run FIFO, not by risk"],
-              ["07", "Draft", "Approved facts re-typed again into E2B(R3) fields"],
-              ["08", "Review", "Reviewer retraces every fact to its source before sign-off"],
-            ].map(([i, t, d]) => (
-              <div className="ch j" key={i}>
-                <span className="i">{i}</span>
-                <div className="t">{t}</div>
-                <div className="d">{d}</div>
-              </div>
+          </ol>
+          <p className="stage-key"><span className="k auto" /> SURE prepares, the reviewer confirms <span className="k human" /> stays with the qualified reviewer</p>
+        </section>
+
+        <section className="band">
+          <div className="band-head">
+            <h2>Three routes, two loops, one gate that cannot be skipped</h2>
+            <p>The path through the graph depends on the state of the case.</p>
+          </div>
+          <div className="routes">
+            <div className="route draft"><h3>Draft</h3><p>No critical conflict and all four minimum criteria met. The narrative is written from verified facts only and every claim is checked.</p><Link href="/demo">Try IN-2026-0392</Link></div>
+            <div className="route esc"><h3>Escalate</h3><p>Sources disagree on a critical field. The drafting agent never runs. A reviewer adjudicates with a reason, and the chain resumes from extraction with that decision.</p><Link href="/demo">Try IN-2026-0433</Link></div>
+            <div className="route hold"><h3>Hold</h3><p>Patient, reporter, event or suspect product is missing, so it is not yet a valid ICSR and the clock has not started. A follow-up query asks for what is missing.</p><Link href="/demo">Try IN-2026-0470</Link></div>
+          </div>
+          <p className="routes-foot">Loops: extraction self-corrects once when the model’s citations fail verification; drafting redrafts once when the claim verifier rejects a sentence. Both are visible in the trace.</p>
+        </section>
+
+        <section className="band">
+          <div className="band-head">
+            <h2>Controls checked by code, not requested in a prompt</h2>
+            <p>A fluent model is not trusted because it sounds right. Its output is trusted only after it survives these checks.</p>
+          </div>
+          <div className="controls">
+            {CONTROLS.map(([t, d]) => (
+              <div key={t}><h3>{t}</h3><p>{d}</p></div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------------- HOW ---------------- */}
-      <section className="band alt" id="how">
-        <div className="site">
-          <div className="kicker">How it works</div>
-          <h2 className="sec">
-            One case, five agentic steps — and a human gate that <em>cannot be skipped.</em>
-          </h2>
-          <p className="sec">
-            The path through the graph depends on the state of the case. An unresolved critical
-            conflict means the drafting agent is never reached at all.
-          </p>
-
-          <div className="steps">
-            {[
-              ["01", "Ingest", "Case bundle imported. Source, timestamp, file identity and permissions recorded before anything is read.", "document inventory"],
-              ["02", "Extract & link", "Fields pulled with the exact source span kept. Every citation verified against the real page text.", "facts + source spans"],
-              ["03", "Reconcile", "Timeline and drug–event graph built. Contradictions surfaced, never guessed at.", "graph + open questions"],
-              ["04", "Rank & draft", "Queue ranked with stated reasons. Narrative written only from sourced facts.", "validated draft"],
-            ].map(([i, t, d, o]) => (
-              <div className="st" key={i}>
-                <div className="h"><i>{i}</i>{t}</div>
-                <div className="b"><p>{d}</p><div className="out">Hands off → {o}</div></div>
-              </div>
-            ))}
-            <div className="st stop">
-              <div className="h"><i>05</i>Human approve</div>
-              <div className="b">
-                <p>A qualified reviewer inspects each source, corrects, or leaves a field unknown. Every edit is versioned.</p>
-                <div className="out">SURE never submits to a regulator</div>
-              </div>
-            </div>
+        <section className="band">
+          <div className="band-head">
+            <h2>Agents, and where each must stop</h2>
+            <p>Every boundary below is enforced in code and printed in the live trace on each run.</p>
           </div>
-
-          <div className="cards">
-            <div className="card key">
-              <span className="tag">The control that matters</span>
-              <h3>Citations are verified, not trusted</h3>
-              <p>
-                Every quoted span is checked against the page it claims to come from. A field whose
-                citation fails verification has its value <b>thrown away</b> and is downgraded to a
-                gap. That is the mechanism behind traceability — a mechanical check, not a prompt
-                instruction.
-              </p>
-            </div>
-            <div className="card">
-              <span className="tag">Gaps stay visible</span>
-              <h3>Unknown stays unknown</h3>
-              <p>
-                No value is ever invented to make a form look complete. Missing and contradictory
-                fields are recorded in a gap ledger, and a follow-up query is drafted — drafted,
-                never answered.
-              </p>
-            </div>
-            <div className="card">
-              <span className="tag">Bounded authority</span>
-              <h3>Agentic in workflow, not in judgement</h3>
-              <p>
-                SURE coordinates extraction, reconciliation, validation and drafting. It does not
-                decide causality, does not decide seriousness, and cannot submit anything anywhere.
-              </p>
-            </div>
+          <div className="table-wrap">
+            <table className="agents">
+              <thead><tr><th>Agent</th><th>What it does</th><th>Where it must stop</th></tr></thead>
+              <tbody>{AGENTS.map(([a, d, s]) => <tr key={a}><td>{a}</td><td>{d}</td><td>{s}</td></tr>)}</tbody>
+            </table>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------------- AGENTS ---------------- */}
-      <section className="band" id="agents">
-        <div className="site">
-          <div className="kicker">Agentic architecture</div>
-          <h2 className="sec">Eight agents. Each one with a <em>hard stop.</em></h2>
-          <p className="sec">
-            Every boundary below is enforced in code and surfaced in the live trace on each run.
-          </p>
-
-          <table className="ag">
-            <thead><tr><th>Agent</th><th>What it is permitted to do</th><th>Where it must stop</th></tr></thead>
-            <tbody>
-              {[
-                ["Intake & classification", "Identifies file types, splits bundles, flags unreadable pages", "Draws no clinical inference at intake"],
-                ["Evidence extraction", "Pulls fields, dates, products, doses and outcomes with source spans", "Preserves original text and units; an unverifiable citation is discarded"],
-                ["Terminology mapping", "Proposes MedDRA and product codes, version recorded", "Cannot overwrite source wording; a human confirms every code"],
-                ["Evidence graph", "Links timeline, medication history and lab findings; marks conflicts", "Labels links documented / candidate / unresolved — never causal"],
-                ["Risk prioritisation", "Ranks the review queue and states the reason for each rank", "Cannot suppress a case subject to mandatory review"],
-                ["Completeness check", "Validates required fields, date order, units, duplicates", "Unknown stays unknown — no value invented to pass a check"],
-                ["Narrative drafting", "Assembles the narrative and structured fields from approved facts", "No unsupported claim; halts on a critical conflict; cannot submit"],
-              ].map(([n, d, s]) => (
-                <tr key={n}><td className="nm">{n}</td><td>{d}</td><td className="stop">{s}</td></tr>
-              ))}
-              <tr className="human">
-                <td className="nm">Qualified reviewer</td>
-                <td>Confirms, corrects, rejects, requests follow-up, approves</td>
-                <td className="stop">Final clinical and regulatory judgement remains human-owned</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ---------------- EVIDENCE ---------------- */}
-      <section className="band alt" id="evidence">
-        <div className="site">
-          <div className="kicker">Research grounding</div>
-          <h2 className="sec">
-            Components proven separately. <em>The chain is what we still have to prove.</em>
-          </h2>
-          <p className="sec">
-            SURE is built on published work — and on an honest reading of what that work does and
-            does not establish. These are each study’s results in each study’s setting. None of them
-            is SURE’s performance.
-          </p>
-
-          <div className="ev">
-            {[
-              ["44.4–95.8%", "PPV range across four monitored ADE types, 10 institutions", "Chen et al., 2020", "Take: configurable rule triggers, each alert carrying its reason. Refuse: treating an alert as a confirmed ADR."],
-              ["91.1 → 86.3", "F1 in-house vs external site — deep learning + drug knowledge graph", "Feng et al., 2023", "Take: graph linking of drug–event pairs. Refuse: assuming performance transfers between sites."],
-              ["AUC 0.707", "Severe-ADR prediction · 508 SADRs · dual-centre cohort", "Bu et al., 2025", "Take: a transparent risk score as a queue aid. Refuse: moderate discrimination posing as judgement."],
-              ["160 vs 50", "ADRs found by active monitoring vs spontaneous reporting · 4.2 vs 10.7 days", "Jing et al., 2026", "Take: active monitoring as a later phase. Refuse: assuming hospital integration in the MVP."],
-            ].map(([n, w, p, t]) => (
-              <div className="evc" key={p}>
-                <div className="n">{n}</div>
-                <div className="w">{w}</div>
-                <div className="p">{p}</div>
-                <div className="t">{t}</div>
-              </div>
-            ))}
+        <section className="band">
+          <div className="band-head">
+            <h2>Measured, not asserted</h2>
+            <p>These numbers are produced by running the agent graph on every reference case when this page is built. The workbench and the evaluation page re-run them live.</p>
           </div>
-
-          <div className="honest">
-            <h3>What SURE does not do</h3>
-            <ul>
-              <li>Decide whether a drug caused an event</li>
-              <li>Decide seriousness or severity</li>
-              <li>Submit anything to a regulator</li>
-              <li>Fill a missing field with a plausible value</li>
-              <li className="do">Links every material field to its source passage</li>
-              <li className="do">Keeps every gap and contradiction visible</li>
-              <li className="do">Versions every reviewer correction</li>
-              <li className="do">Halts and escalates when evidence conflicts</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- RESULTS ---------------- */}
-      <section className="band">
-        <div className="site">
-          <div className="kicker">Measured, not asserted</div>
-          <h2 className="sec">Current results on <em>three synthetic cases.</em></h2>
-          <p className="sec">
-            Run the evaluation harness yourself with <code>python3 eval/run_eval.py</code>. The
-            extractor was developed against these same three cases, so critical-field accuracy here
-            is a tuned result, not a validated one — held-out evaluation is the Week 6–7 pilot gate.
-          </p>
           <div className="results">
-            <div className="res"><div className="n">15/15</div><div className="l">Critical fields correct</div></div>
-            <div className="res"><div className="n">0 / 22</div><div className="l">Unsupported claims among asserted values</div></div>
-            <div className="res"><div className="n">5 / 7</div><div className="l">Gaps correctly identified</div></div>
-            <div className="res"><div className="n">3 / 3</div><div className="l">Escalation decisions correct</div></div>
+            {[
+              ["Demo cases", r.core],
+              ["Stress cases", r.stress],
+            ].map(([name, t]) => {
+              const x = t as typeof r.core;
+              return (
+                <div key={name as string} className="result">
+                  <h3>{name as string} <span>n = {x.cases}, author-tuned</span></h3>
+                  <dl>
+                    <div><dt>All 14 fields correct</dt><dd>{x.allCorrect}/{x.allTotal}</dd></div>
+                    <div><dt>Values without a verified citation</dt><dd>{x.unsupported}/{x.asserted}</dd></div>
+                    <div><dt>Gaps found</dt><dd>{x.gapHits}/{x.gapExpected}{x.gapFalse ? ` (+${x.gapFalse} false)` : ""}</dd></div>
+                    <div><dt>Correct route</dt><dd>{x.routeOk}/{x.cases}</dd></div>
+                    <div><dt>Safety flags raised</dt><dd>{x.flagsHit}/{x.flagsExpected}</dd></div>
+                  </dl>
+                </div>
+              );
+            })}
           </div>
-          <div style={{ marginTop: 30 }}>
-            <Link className="cta lg" href="/demo">Try it on the three cases →</Link>
+          <div className="honest">
+            <p><b>What these numbers do not show.</b> Both sets were written by the team that wrote the extractor, so they demonstrate that the controls work, not validated accuracy. The evidence that counts is a held-out set written by someone who has not seen the code{r.heldout.cases ? ` (currently ${r.heldout.allCorrect}/${r.heldout.allTotal} fields on ${r.heldout.cases} cases)` : ", which is the week 6–7 pilot gate"}. The case brief’s 70% drafting-time reduction and 100% accuracy are targets; the <Link href="/study">time study</Link> measures the first, and nothing here claims either.</p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <footer className="foot">
-        <div className="site">
-          <div className="warn">
-            All case data is synthetic and fabricated for demonstration. No real patient data is
-            used anywhere in this product. Not for clinical or regulatory use.
+        <section className="band">
+          <div className="band-head">
+            <h2>Pilot plan and what it costs</h2>
+            <p>Planning estimates for a 12-week pilot with one Indian MAH or PV service provider, one therapeutic area and governed historical cases. Every figure is an assumption to validate.</p>
           </div>
-          <p>
-            <b>SURE — Safety Understanding, Risk &amp; Evidence.</b> Built for ABHIKALP 2026,
-            Case 6: Healthcare &amp; Pharmaceuticals.
-          </p>
-          <p style={{ marginTop: 6 }}>
-            <b>Team Product Avengers</b> — Vaishnavi Tyagi · Gautam Jharwal · Sanhita Mahtre · Tanmya Pol
-          </p>
-          <p style={{ marginTop: 14, fontSize: 11 }}>
-            70% drafting-time reduction and 100% clinical data accuracy are targets stated in the
-            case brief. They are not results demonstrated by this prototype.
-          </p>
-        </div>
-      </footer>
+          <div className="two">
+            <div className="table-wrap">
+              <table className="agents">
+                <thead><tr><th>Weeks</th><th>Stage</th><th>Gate to pass</th></tr></thead>
+                <tbody>
+                  <tr><td>1–2</td><td>Discovery and baseline time study</td><td>Measured manual minutes per case, by stage</td></tr>
+                  <tr><td>3–5</td><td>Configure fields, rules, templates</td><td>Reviewers can trace and correct every field</td></tr>
+                  <tr><td>6–7</td><td>Held-out evaluation</td><td>Agreed critical-field accuracy; zero unsupported claims</td></tr>
+                  <tr><td>8–10</td><td>Shadow mode beside the live process</td><td>Net time saved without extra correction burden</td></tr>
+                  <tr><td>11–12</td><td>Assisted use with approval and rollback</td><td>Proceed, revise or stop on measured results</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="table-wrap">
+              <table className="agents">
+                <thead><tr><th>Cost line</th><th>Estimate</th></tr></thead>
+                <tbody>
+                  <tr><td>Model calls per case (flash-tier, about 7k input and 2k output tokens across 3–4 calls)</td><td>₹1–7, depending on model and list price</td></tr>
+                  <tr><td>Hosting during pilot (private network, database, logging)</td><td>₹20–40k a month</td></tr>
+                  <tr><td>Pilot team for 12 weeks (AI engineer, full-stack engineer, part-time PV expert, PM)</td><td>₹12–20 lakh</td></tr>
+                  <tr><td>Computer-system validation and security review</td><td>₹3–8 lakh</td></tr>
+                  <tr><td><b>Total pilot</b></td><td><b>about ₹16–30 lakh; compute is under 1%</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section className="band">
+          <div className="band-head">
+            <h2>What SURE does not do yet</h2>
+            <p>Stated plainly, because a reviewer will ask.</p>
+          </div>
+          <ul className="limits">
+            <li>Read scanned pages. Text PDFs are read in the browser; OCR is a pilot integration.</li>
+            <li>Code against the licensed MedDRA dictionary. The demo uses a small illustrative term list and labels it as such.</li>
+            <li>Produce a schema-valid HL7 E2B(R3) message or transmit anything. The export is keyed by E2B element IDs for review.</li>
+            <li>Read Indian languages beyond a small Hinglish lexicon in rules mode. The model reader handles more, and always cites the original wording.</li>
+            <li>Decide causality, expectedness or seriousness. It shows the evidence and the clock; a qualified person decides.</li>
+            <li>Integrate with a safety database. Phase 2 of the roadmap, after the pilot gates are passed.</li>
+            <li>Keep data inside your network. In live mode the demo sends redacted synthetic text to a public model API; production would use a private, region-pinned deployment under a data-processing agreement.</li>
+            <li>Persist the audit trail. The demo keeps the hash chain in the browser session and lets you download it; production writes it to an append-only store.</li>
+          </ul>
+        </section>
+
+        <footer className="foot">
+          <p><b>SURE: Safety Understanding, Risk &amp; Evidence.</b> Built for ABHIKALP 2026, Case 6: Healthcare &amp; Pharmaceuticals, by Team Product Avengers: Vaishnavi Tyagi, Gautam Jharwal, Sanhita Mahtre and Tanmay Pol.</p>
+          <p>All case data is synthetic and fabricated for demonstration. No real patient data is used. Not for clinical or regulatory use. Built with Next.js and TypeScript, one configurable model provider (Gemini, OpenAI or Anthropic), pdf.js and a Python evaluation harness.</p>
+        </footer>
+      </main>
     </>
   );
 }

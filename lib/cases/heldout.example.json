@@ -1,0 +1,38 @@
+[
+  {
+    "id": "HO-001",
+    "label": "Short description of the case",
+    "blurb": "Written by a teammate who has not read lib/engine. Run once, then freeze the result.",
+    "documents": [
+      {
+        "id": "ho-001-1",
+        "kind": "physician_note",
+        "title": "Investigator note — Site 11",
+        "received": "2026-07-01T09:00:00Z",
+        "pages": [{ "n": 1, "text": "Paste the full synthetic document text here." }]
+      }
+    ],
+    "reference": {
+      "fields": {
+        "patient": ["SYN-000-0000"],
+        "reporter": ["site 11"],
+        "event_term": ["event name"],
+        "onset_date": "2026-06-20",
+        "suspect_drug": ["drug name"],
+        "dose": null,
+        "therapy_start": null,
+        "therapy_stop": null,
+        "dechallenge": null,
+        "rechallenge": null,
+        "seriousness": ["non-serious"],
+        "outcome": null,
+        "relevant_lab": null,
+        "concomitant": null
+      },
+      "expectedGaps": ["dose", "therapy_start", "therapy_stop", "dechallenge", "rechallenge", "outcome", "relevant_lab", "concomitant"],
+      "expectedRoute": "draft",
+      "expectedRisk": "routine",
+      "expectedValid": true
+    }
+  }
+]

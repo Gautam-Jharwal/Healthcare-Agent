@@ -1,0 +1,1455 @@
+{
+  "at": "2026-10-27T14:52:05.083Z",
+  "scores": [
+    {
+      "caseId": "IN-2026-0392",
+      "label": "Urticaria after amoxicillin",
+      "set": "core",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-114-0087"
+          ],
+          "got": "SYN-114-0087 · Female, 34 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 02"
+          ],
+          "got": "Investigator, Site 02",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "urticaria"
+          ],
+          "got": "Urticaria",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "amoxicillin"
+          ],
+          "got": "Amoxicillin",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-03-26",
+          "got": "26 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "non-serious"
+          ],
+          "got": "Non-serious",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "recovered"
+          ],
+          "got": "Recovered",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "500 mg",
+            "three times daily"
+          ],
+          "got": "500 mg oral, three times daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-03-22",
+          "got": "22 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": "2026-03-27",
+          "got": "27 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": [
+            "positive"
+          ],
+          "got": "Positive — event abated after withdrawal",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": [
+            "not performed"
+          ],
+          "got": "Not performed",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": [
+            "eosinophils",
+            "6.2"
+          ],
+          "got": "Eosinophils 6.2 % (high)",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "none"
+          ],
+          "got": "None",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 14,
+      "gapHits": 0,
+      "gapExpected": 0,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "routine",
+      "expectedRisk": "routine",
+      "validOk": true,
+      "flagsExpected": [],
+      "flagsFound": [],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 7,
+      "narrativeUnsupported": 0,
+      "ms": 23
+    },
+    {
+      "caseId": "IN-2026-0417",
+      "label": "Thrombocytopenia, two candidate drugs",
+      "set": "core",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-221-0143"
+          ],
+          "got": "SYN-221-0143 · Male, 58 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 04"
+          ],
+          "got": "Investigator, Site 04",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "thrombocytopenia"
+          ],
+          "got": "Thrombocytopenia",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-03-10",
+          "got": "10 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "serious",
+            "hospitalisation"
+          ],
+          "got": "Serious — hospitalisation",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": [
+            "platelet",
+            "42"
+          ],
+          "got": "Haemoglobin 11.9 g/dL (low); Platelet count 42 x 10^9/L (critical low)",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "metformin"
+          ],
+          "got": "Metformin 1000 mg oral, twice daily (long-term)",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 7,
+      "gapHits": 7,
+      "gapExpected": 7,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "urgent",
+      "expectedRisk": "urgent",
+      "validOk": true,
+      "flagsExpected": [
+        "severe_thrombocytopenia"
+      ],
+      "flagsFound": [
+        "severe_thrombocytopenia"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 9,
+      "narrativeUnsupported": 0,
+      "ms": 5
+    },
+    {
+      "caseId": "IN-2026-0433",
+      "label": "Liver injury, conflicting onset",
+      "set": "core",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-308-0056"
+          ],
+          "got": "SYN-308-0056 · Female, 47 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 07"
+          ],
+          "got": "Investigator, Site 07",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "liver injury"
+          ],
+          "got": "Drug-induced liver injury",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "isoniazid"
+          ],
+          "got": "Isoniazid",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "conflict",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "300 mg",
+            "once daily"
+          ],
+          "got": "300 mg oral, once daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-03-02",
+          "got": "2 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": [
+            "ALT",
+            "412",
+            "AST",
+            "388",
+            "bilirubin",
+            "3.9"
+          ],
+          "got": "ALT (SGPT) 412 U/L (high); AST (SGOT) 388 U/L (high); Total bilirubin 3.9 mg/dL (high)",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "paracetamol"
+          ],
+          "got": "oral contraceptive (long-term), paracetamol as required for headache — patient reports occasional use, dose and frequency not quantified",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 8,
+      "gapHits": 6,
+      "gapExpected": 6,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "escalate",
+      "expectedRoute": "escalate",
+      "riskOk": true,
+      "risk": "expedited",
+      "expectedRisk": "expedited",
+      "validOk": true,
+      "flagsExpected": [
+        "hys_law",
+        "unreadable_page"
+      ],
+      "flagsFound": [
+        "unreadable_page",
+        "hys_law"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 0,
+      "narrativeUnsupported": 0,
+      "ms": 2
+    },
+    {
+      "caseId": "IN-2026-0451",
+      "label": "Fatal SJS/TEN after carbamazepine",
+      "set": "stress",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-402-0019"
+          ],
+          "got": "SYN-402-0019 · Male, 29 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 03"
+          ],
+          "got": "Dr. A. Rao, Principal Investigator, Site 03",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "stevens-johnson"
+          ],
+          "got": "Stevens-Johnson syndrome",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "carbamazepine"
+          ],
+          "got": "Carbamazepine",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-04-05",
+          "got": "5 April 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "death",
+            "life-threatening",
+            "hospitalisation"
+          ],
+          "got": "Serious — death, life-threatening, hospitalisation",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "fatal"
+          ],
+          "got": "Fatal",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "200 mg",
+            "twice daily"
+          ],
+          "got": "200 mg oral, twice daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-03-18",
+          "got": "18 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": "2026-04-06",
+          "got": "6 April 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": [
+            "not performed"
+          ],
+          "got": "Not performed",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "none"
+          ],
+          "got": "None",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 12,
+      "gapHits": 2,
+      "gapExpected": 2,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "urgent",
+      "expectedRisk": "urgent",
+      "validOk": true,
+      "flagsExpected": [
+        "fatal_or_life_threatening",
+        "ambiguous_date_format"
+      ],
+      "flagsFound": [
+        "ambiguous_date_format",
+        "fatal_or_life_threatening"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 9,
+      "narrativeUnsupported": 0,
+      "ms": 3
+    },
+    {
+      "caseId": "IN-2026-0458",
+      "label": "HIT with a Hinglish diary",
+      "set": "stress",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-517-0204"
+          ],
+          "got": "SYN-517-0204 · Female, 66 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 05"
+          ],
+          "got": "Investigator, Site 05",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "heparin-induced thrombocytopenia"
+          ],
+          "got": "Heparin-induced thrombocytopenia",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "heparin"
+          ],
+          "got": "Unfractionated heparin",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-05-06",
+          "got": "6 May 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "serious",
+            "hospitalisation"
+          ],
+          "got": "Serious — hospitalisation",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "recovered"
+          ],
+          "got": "Recovered",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "5000 units",
+            "twice daily"
+          ],
+          "got": "5000 units subcutaneous, twice daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-05-01",
+          "got": "1 May 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": "2026-05-09",
+          "got": "9 May 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": [
+            "positive"
+          ],
+          "got": "Positive — event abated after withdrawal",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": [
+            "not performed"
+          ],
+          "got": "Not performed",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": [
+            "platelet",
+            "38,000"
+          ],
+          "got": "Haemoglobin 10.9 g/dL (low); Platelet count 38,000 /uL (critical low), ≈38 x 10^9/L",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "paracetamol"
+          ],
+          "got": "paracetamol 650 mg as required",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 14,
+      "gapHits": 0,
+      "gapExpected": 0,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "urgent",
+      "expectedRisk": "urgent",
+      "validOk": true,
+      "flagsExpected": [
+        "severe_thrombocytopenia",
+        "regional_language"
+      ],
+      "flagsFound": [
+        "regional_language",
+        "severe_thrombocytopenia"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 12,
+      "narrativeUnsupported": 0,
+      "ms": 5
+    },
+    {
+      "caseId": "IN-2026-0462",
+      "label": "Angioedema with an embedded instruction",
+      "set": "stress",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-118-0331"
+          ],
+          "got": "SYN-118-0331 · Female, 52 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 09"
+          ],
+          "got": "Dr. M. Iyer, Site 09",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "angioedema"
+          ],
+          "got": "Angioedema",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "enalapril"
+          ],
+          "got": "Enalapril",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-04-20",
+          "got": "20 April 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "serious",
+            "hospitalisation"
+          ],
+          "got": "Serious — hospitalisation",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "recovered"
+          ],
+          "got": "Recovered",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "5 mg",
+            "once daily"
+          ],
+          "got": "5 mg oral, once daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-01-10",
+          "got": "10 January 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": "2026-04-20",
+          "got": "20 April 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": [
+            "positive"
+          ],
+          "got": "Positive — event abated after withdrawal",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": [
+            "atorvastatin"
+          ],
+          "got": "atorvastatin 10 mg once daily",
+          "status": "sourced",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 12,
+      "gapHits": 2,
+      "gapExpected": 2,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "urgent",
+      "expectedRisk": "urgent",
+      "validOk": true,
+      "flagsExpected": [
+        "prompt_injection",
+        "personal_identifier"
+      ],
+      "flagsFound": [
+        "personal_identifier",
+        "prompt_injection"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 9,
+      "narrativeUnsupported": 0,
+      "ms": 3
+    },
+    {
+      "caseId": "IN-2026-0417-FU1",
+      "label": "Follow-up to the thrombocytopenia case",
+      "set": "stress",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-221-0143"
+          ],
+          "got": "SYN-221-0143 · Male, 58 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": [
+            "site 04"
+          ],
+          "got": "Haematology team, Site 04",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "thrombocytopenia"
+          ],
+          "got": "Thrombocytopenia",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "linezolid"
+          ],
+          "got": "Linezolid",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "recovering"
+          ],
+          "got": "Recovering",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": "2026-03-15",
+          "got": "15 March 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": [
+            "positive"
+          ],
+          "got": "Positive — event abated after withdrawal",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": [
+            "not performed"
+          ],
+          "got": "Not performed",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 8,
+      "gapHits": 6,
+      "gapExpected": 6,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "draft",
+      "expectedRoute": "draft",
+      "riskOk": true,
+      "risk": "expedited",
+      "expectedRisk": "expedited",
+      "validOk": true,
+      "flagsExpected": [
+        "possible_follow_up"
+      ],
+      "flagsFound": [
+        "possible_follow_up"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 3,
+      "narrativeUnsupported": 0,
+      "ms": 2
+    },
+    {
+      "caseId": "IN-2026-0470",
+      "label": "Hypoglycaemia, reporter missing",
+      "set": "stress",
+      "mode": "seeded",
+      "fields": [
+        {
+          "key": "patient",
+          "label": "Identifiable patient",
+          "critical": true,
+          "expected": [
+            "SYN-PT-0907"
+          ],
+          "got": "SYN-PT-0907 · Female, 71 years",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "reporter",
+          "label": "Identifiable reporter",
+          "critical": true,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "event_term",
+          "label": "Adverse event",
+          "critical": true,
+          "expected": [
+            "hypoglycaemia"
+          ],
+          "got": "Hypoglycaemia",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "suspect_drug",
+          "label": "Suspect product",
+          "critical": true,
+          "expected": [
+            "glimepiride"
+          ],
+          "got": "Glimepiride",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "onset_date",
+          "label": "Onset date",
+          "critical": true,
+          "expected": "2026-06-14",
+          "got": "14 June 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "seriousness",
+          "label": "Seriousness",
+          "critical": true,
+          "expected": [
+            "non-serious"
+          ],
+          "got": "Non-serious",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "critical": true,
+          "expected": [
+            "recovered"
+          ],
+          "got": "Recovered",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "dose",
+          "label": "Dose & route",
+          "critical": false,
+          "expected": [
+            "2 mg",
+            "once daily"
+          ],
+          "got": "2 mg oral, once daily",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_start",
+          "label": "Therapy start",
+          "critical": false,
+          "expected": "2026-06-03",
+          "got": "3 June 2026",
+          "status": "sourced",
+          "correct": true
+        },
+        {
+          "key": "therapy_stop",
+          "label": "Therapy stop",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "dechallenge",
+          "label": "Dechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "rechallenge",
+          "label": "Rechallenge",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "relevant_lab",
+          "label": "Abnormal labs",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        },
+        {
+          "key": "concomitant",
+          "label": "Concomitant products",
+          "critical": false,
+          "expected": null,
+          "got": null,
+          "status": "gap",
+          "correct": true
+        }
+      ],
+      "allCorrect": 14,
+      "allTotal": 14,
+      "critCorrect": 7,
+      "critTotal": 7,
+      "unsupported": 0,
+      "asserted": 8,
+      "gapHits": 6,
+      "gapExpected": 6,
+      "gapFalse": 0,
+      "routeOk": true,
+      "route": "hold",
+      "expectedRoute": "hold",
+      "riskOk": true,
+      "risk": "routine",
+      "expectedRisk": "routine",
+      "validOk": true,
+      "flagsExpected": [],
+      "flagsFound": [
+        "invalid_icsr"
+      ],
+      "modelCitationsRejected": 0,
+      "narrativeClaims": 0,
+      "narrativeUnsupported": 0,
+      "ms": 3
+    }
+  ],
+  "totals": {
+    "cases": 8,
+    "allCorrect": 112,
+    "allTotal": 112,
+    "critCorrect": 56,
+    "critTotal": 56,
+    "unsupported": 0,
+    "asserted": 83,
+    "gapHits": 29,
+    "gapExpected": 29,
+    "gapFalse": 0,
+    "routeOk": 8,
+    "riskOk": 8,
+    "validOk": 8,
+    "flagsHit": 10,
+    "flagsExpected": 10
+  }
+}
