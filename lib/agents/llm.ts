@@ -17,7 +17,7 @@
 
 const OPENAI_MODEL = process.env.SURE_OPENAI_MODEL ?? "gpt-4o-mini";
 const ANTHROPIC_MODEL = process.env.SURE_ANTHROPIC_MODEL ?? "claude-haiku-4-5";
-const GEMINI_MODEL = process.env.SURE_GEMINI_MODEL ?? "gemini-2.0-flash";
+const GEMINI_MODEL = process.env.SURE_GEMINI_MODEL ?? "gemini-flash-latest";
 
 export function activeProvider(): "openai" | "anthropic" | "gemini" | null {
   if (process.env.OPENAI_API_KEY) return "openai";
