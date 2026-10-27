@@ -7,7 +7,7 @@
  * Set ONE of these in your Vercel environment variables:
  *   OPENAI_API_KEY      -> uses gpt-4o-mini        (paid)
  *   ANTHROPIC_API_KEY   -> uses claude-haiku-4-5   (paid)
- *   GEMINI_API_KEY      -> uses gemini-2.0-flash   (Google AI Studio free tier)
+ *   GEMINI_API_KEY      -> uses gemini-flash-latest (Google AI Studio free tier)
  *
  * If more than one is set, the order above decides which wins.
  *
@@ -15,9 +15,9 @@
  * deterministic path and the UI reports mode = "seeded".
  */
 
-const OPENAI_MODEL = process.env.SURE_OPENAI_MODEL ?? "gpt-4o-mini";
-const ANTHROPIC_MODEL = process.env.SURE_ANTHROPIC_MODEL ?? "claude-haiku-4-5";
-const GEMINI_MODEL = process.env.SURE_GEMINI_MODEL ?? "gemini-flash-latest";
+const OPENAI_MODEL = process.env.SURE_OPENAI_MODEL?.trim() ?? "gpt-4o-mini";
+const ANTHROPIC_MODEL = process.env.SURE_ANTHROPIC_MODEL?.trim() ?? "claude-haiku-4-5";
+const GEMINI_MODEL = process.env.SURE_GEMINI_MODEL?.trim() ?? "gemini-flash-latest";
 
 export function activeProvider(): "openai" | "anthropic" | "gemini" | null {
   if (process.env.OPENAI_API_KEY) return "openai";
@@ -58,7 +58,7 @@ export async function callModelJSON<T>(call: ModelCall): Promise<T> {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        authorization: `Bearer ${process.env.OPENAI_API_KEY?.trim()}`,
       },
       body: JSON.stringify({
         model: OPENAI_MODEL,
@@ -77,7 +77,7 @@ export async function callModelJSON<T>(call: ModelCall): Promise<T> {
   } else if (provider === "gemini") {
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent` +
-      `?key=${process.env.GEMINI_API_KEY}`;
+      `?key=${process.env.GEMINI_API_KEY?.trim()}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -99,7 +99,7 @@ export async function callModelJSON<T>(call: ModelCall): Promise<T> {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY as string,
+        "x-api-key": (process.env.ANTHROPIC_API_KEY as string).trim(),
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
