@@ -83,7 +83,8 @@ export async function extract(file: CaseFile): Promise<AgentResult> {
       });
       proposed = out.fields ?? [];
       usedModel = true;
-    } catch {
+    } catch (err) {
+      console.error("[SURE] extract agent fell back to rules:", err);
       proposed = deterministicExtract(readable);
     }
   } else {
@@ -371,7 +372,8 @@ Return {"narrative":"..."}`,
       });
       narrative = out.narrative;
       usedModel = true;
-    } catch {
+    } catch (err) {
+      console.error("[SURE] draft agent fell back to template:", err);
       narrative = templateNarrative(sourced, gaps);
     }
   } else {
