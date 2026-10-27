@@ -64,6 +64,12 @@ export interface TraceEntry {
   stopConditionChecked: string;
   stopTriggered: boolean;
   modelVersion: string | null;
+  /**
+   * Set when this agent intended to use the model but could not, e.g. the
+   * provider was overloaded. Surfaced in the UI so a fallback is visible
+   * rather than being mistaken for a configuration mistake.
+   */
+  fallbackReason?: string;
   outputKeys: string[];
 }
 

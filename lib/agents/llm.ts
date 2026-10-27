@@ -30,7 +30,7 @@ export function activeModelVersion(): string | null {
   const p = activeProvider();
   if (p === "openai") return OPENAI_MODEL;
   if (p === "anthropic") return ANTHROPIC_MODEL;
-  if (p === "gemini") return GEMINI_MODEL;
+  if (p === "gemini") return lastGeminiModel ?? GEMINI_MODEL;
   return null;
 }
 
@@ -39,6 +39,115 @@ export interface ModelCall {
   user: string;
   /** Maximum tokens for the reply. Kept small; these are extraction tasks. */
   maxTokens?: number;
+}
+
+/**
+ * Fallback chain for Gemini. "gemini-flash-latest" is an alias pointing at the
+ * newest flash model, which makes it the busiest endpoint on the free tier and
+ * the one most likely to answer 503. The lite models carry far less traffic,
+ * so when the primary stays busy we drop to those rather than giving up and
+ * silently falling back to the deterministic path.
+ */
+const GEMINI_FALLBACKS = ["gemini-2.5-flash-lite", "gemini-2.5-flash"];
+
+function geminiChain(): string[] {
+  return [...new Set([GEMINI_MODEL, ...GEMINI_FALLBACKS])];
+}
+
+/** The model that actually answered, which is not always the one configured. */
+let lastGeminiModel: string | null = null;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Overload and rate-limit responses are worth retrying; the rest are not. */
+function isTransient(status: number): boolean {
+  return status === 429 || status === 500 || status === 503 || status === 504;
+}
+
+/**
+ * Asks Gemini for JSON, retrying transient failures and walking down the model
+ * chain. Bounded by a wall-clock deadline so it can never outlive the Vercel
+ * function and turn a slow answer into no answer at all.
+ */
+async function geminiGenerate(
+  call: ModelCall,
+  maxTokens: number
+): Promise<{ raw: string; model: string }> {
+  const key = process.env.GEMINI_API_KEY?.trim();
+
+  const body = (thinkingOff: boolean) =>
+    JSON.stringify({
+      systemInstruction: { parts: [{ text: call.system }] },
+      contents: [{ role: "user", parts: [{ text: call.user }] }],
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: Math.max(maxTokens, 4096),
+        responseMimeType: "application/json",
+        // Extraction wants structured output, not reasoning. Thinking tokens
+        // come out of this same budget and can consume all of it.
+        ...(thinkingOff ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+      },
+    });
+
+  const failures: string[] = [];
+  const deadline = Date.now() + 32_000;
+
+  for (const model of geminiChain()) {
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}` +
+      `:generateContent?key=${key}`;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (Date.now() > deadline) {
+        failures.push("deadline_reached");
+        throw new Error(`gemini_unavailable [${failures.join(" | ")}]`);
+      }
+
+      let res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: body(true),
+      });
+
+      // Models that predate thinkingConfig reject it outright.
+      if (res.status === 400) {
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: body(false),
+        });
+      }
+
+      if (isTransient(res.status)) {
+        failures.push(`${model}:${res.status}`);
+        await sleep(700 * (attempt + 1));
+        continue;
+      }
+
+      if (!res.ok) {
+        // A permanent error on this model: no point retrying it, try the next.
+        failures.push(`${model}:${res.status} ${(await res.text()).slice(0, 160)}`);
+        break;
+      }
+
+      const data = await res.json();
+      const cand = data.candidates?.[0];
+      // Thinking models return reasoning parts alongside the answer. Take
+      // every part carrying text that is not flagged as a thought.
+      const parts: { text?: string; thought?: boolean }[] = cand?.content?.parts ?? [];
+      const raw = parts
+        .filter((pt) => pt?.text && !pt.thought)
+        .map((pt) => pt.text)
+        .join("");
+
+      if (raw) return { raw, model };
+
+      failures.push(`${model}:empty(finishReason=${cand?.finishReason ?? "?"})`);
+      break;
+    }
+  }
+
+  throw new Error(`gemini_unavailable [${failures.join(" | ")}]`);
 }
 
 /**
@@ -75,36 +184,9 @@ export async function callModelJSON<T>(call: ModelCall): Promise<T> {
     const data = await res.json();
     raw = data.choices?.[0]?.message?.content ?? "";
   } else if (provider === "gemini") {
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent` +
-      `?key=${process.env.GEMINI_API_KEY?.trim()}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: call.system }] },
-        contents: [{ role: "user", parts: [{ text: call.user }] }],
-        generationConfig: {
-          temperature: 0,
-          // Thinking tokens are drawn from this same budget, so give it headroom.
-          maxOutputTokens: Math.max(maxTokens, 8192),
-          responseMimeType: "application/json",
-        },
-      }),
-    });
-    if (!res.ok) throw new Error(`gemini_${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    const cand = data.candidates?.[0];
-    // Thinking models return reasoning parts alongside the answer. Take every
-    // part that carries text and is not flagged as a thought, then join them.
-    const parts: { text?: string; thought?: boolean }[] = cand?.content?.parts ?? [];
-    raw = parts.filter((pt) => pt?.text && !pt.thought).map((pt) => pt.text).join("");
-    if (!raw) {
-      throw new Error(
-        `gemini_empty_response (finishReason=${cand?.finishReason ?? "?"}, ` +
-          `parts=${parts.length}, promptFeedback=${JSON.stringify(data.promptFeedback ?? null)})`
-      );
-    }
+    const out = await geminiGenerate(call, maxTokens);
+    lastGeminiModel = out.model;
+    raw = out.raw;
   } else {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

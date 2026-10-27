@@ -70,6 +70,7 @@ export async function extract(file: CaseFile): Promise<AgentResult> {
 
   let proposed: Partial<ExtractedField>[];
   let usedModel = false;
+  let fallbackReason: string | undefined;
 
   if (activeProvider()) {
     try {
@@ -85,6 +86,7 @@ export async function extract(file: CaseFile): Promise<AgentResult> {
       usedModel = true;
     } catch (err) {
       console.error("[SURE] extract agent fell back to rules:", err);
+      fallbackReason = describeFallback(err);
       proposed = deterministicExtract(readable);
     }
   } else {
@@ -145,6 +147,7 @@ export async function extract(file: CaseFile): Promise<AgentResult> {
       stopConditionChecked: STOP_CONDITIONS.extract,
       stopTriggered: rejected > 0,
       modelVersion: usedModel ? activeModelVersion() : null,
+      fallbackReason,
       outputKeys: ["fields"],
     },
   };
@@ -353,6 +356,7 @@ export async function draft(file: CaseFile): Promise<AgentResult> {
   const gaps = file.fields.filter((f) => f.status === "gap");
   let narrative: string;
   let usedModel = false;
+  let fallbackReason: string | undefined;
 
   const factBlock = sourced.map((f) => `${f.label}: ${f.value} [${f.citations[0]?.docTitle ?? "source"} p.${f.citations[0]?.page ?? "?"}]`).join("\n");
   const gapBlock = gaps.map((f) => f.label).join(", ") || "none";
@@ -374,6 +378,7 @@ Return {"narrative":"..."}`,
       usedModel = true;
     } catch (err) {
       console.error("[SURE] draft agent fell back to template:", err);
+      fallbackReason = describeFallback(err);
       narrative = templateNarrative(sourced, gaps);
     }
   } else {
@@ -390,6 +395,7 @@ Return {"narrative":"..."}`,
       stopConditionChecked: STOP_CONDITIONS.draft,
       stopTriggered: false,
       modelVersion: usedModel ? activeModelVersion() : null,
+      fallbackReason,
       outputKeys: ["narrative"],
     },
   };
@@ -575,4 +581,22 @@ function deterministicExtract(docs: CaseDocument[]): Partial<ExtractedField>[] {
   );
 
   return out;
+}
+
+/**
+ * Turns a provider error into one short line a reviewer can act on. Keeps the
+ * distinction that matters: the provider was busy (try again) versus the setup
+ * is wrong (fix the configuration).
+ */
+function describeFallback(err: unknown): string {
+  const msg = String(err);
+  if (/gemini_unavailable|_503|_429|_500|_504|UNAVAILABLE/.test(msg))
+    return "Model provider overloaded — used the deterministic path instead";
+  if (/no_provider_configured/.test(msg))
+    return "No API key configured — running in seeded mode";
+  if (/_401|_403|API_KEY_INVALID/.test(msg))
+    return "API key rejected by the provider";
+  if (/_404/.test(msg)) return "Configured model not available to this key";
+  if (/empty\(finishReason/.test(msg)) return "Model returned no usable answer";
+  return "Model call failed — used the deterministic path instead";
 }
