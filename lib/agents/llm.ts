@@ -86,14 +86,25 @@ export async function callModelJSON<T>(call: ModelCall): Promise<T> {
         contents: [{ role: "user", parts: [{ text: call.user }] }],
         generationConfig: {
           temperature: 0,
-          maxOutputTokens: maxTokens,
+          // Thinking tokens are drawn from this same budget, so give it headroom.
+          maxOutputTokens: Math.max(maxTokens, 8192),
           responseMimeType: "application/json",
         },
       }),
     });
     if (!res.ok) throw new Error(`gemini_${res.status}: ${await res.text()}`);
     const data = await res.json();
-    raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    const cand = data.candidates?.[0];
+    // Thinking models return reasoning parts alongside the answer. Take every
+    // part that carries text and is not flagged as a thought, then join them.
+    const parts: { text?: string; thought?: boolean }[] = cand?.content?.parts ?? [];
+    raw = parts.filter((pt) => pt?.text && !pt.thought).map((pt) => pt.text).join("");
+    if (!raw) {
+      throw new Error(
+        `gemini_empty_response (finishReason=${cand?.finishReason ?? "?"}, ` +
+          `parts=${parts.length}, promptFeedback=${JSON.stringify(data.promptFeedback ?? null)})`
+      );
+    }
   } else {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
