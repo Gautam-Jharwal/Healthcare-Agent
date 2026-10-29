@@ -420,13 +420,13 @@ export default function Workbench() {
 
           {composing && (
             <div className="composer">
-              <p className="small muted">Paste or load up to four synthetic documents for one case. Do not use real patient data. Text and text-based PDFs are read in your browser; scanned PDFs need OCR, which this demo does not do.</p>
+              <p className="small muted">Upload your documents here. Accepted formats: .pdf, .txt. Up to four documents per case. Use synthetic data only.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "10px 0 4px" }}>
                 <label className="file-label">
-                  {loadingFile === 0 ? "Reading…" : "Load the whole case — select several files at once"}
+                  {loadingFile === 0 ? "Reading…" : "Upload documents — select several files at once"}
                   <input className="sr-only" type="file" multiple accept=".pdf,.txt,.md,text/plain,application/pdf" onChange={(e) => e.target.files?.length && loadFiles(0, e.target.files)} />
                 </label>
-                <span className="small muted">The document type is guessed from the file name. Change it below if the guess is wrong.</span>
+                <span className="small muted">Select one file or several at once. Check the type on each before running.</span>
               </div>
               {docs.map((d, i) => (
                 <div className="doc-block" key={i}>
