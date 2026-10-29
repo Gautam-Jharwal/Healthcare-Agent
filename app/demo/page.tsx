@@ -423,7 +423,7 @@ export default function Workbench() {
               <p className="small muted">Upload your documents here. Accepted formats: .pdf, .txt. Up to four documents per case. Use synthetic data only.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "10px 0 4px" }}>
                 <label className="file-label">
-                  {loadingFile === 0 ? "Reading…" : "Upload documents — select several files at once"}
+                  {loadingFile === 0 ? "Reading…" : "Upload documents"}
                   <input className="sr-only" type="file" multiple accept=".pdf,.txt,.md,text/plain,application/pdf" onChange={(e) => e.target.files?.length && loadFiles(0, e.target.files)} />
                 </label>
                 <span className="small muted">Select one file or several at once. Check the type on each before running.</span>
@@ -503,7 +503,8 @@ export default function Workbench() {
                       {file.riskRank && <span className={`chip lvl-${file.riskRank.level}`}>{file.riskRank.level}</span>}
                       {file.route && <span className={`chip ${file.route === "draft" ? "st-sourced" : file.route === "escalate" ? "st-conflict" : "st-gap"}`}>{file.route === "draft" ? "drafted" : file.route === "escalate" ? "escalated" : "held for follow-up"}</span>}
                       {Object.keys(applied).length > 0 && <span className="chip st-human">{Object.keys(applied).length} reviewer decision(s)</span>}
-                                            {done && <span className="chip plain">{file.mode === "live" ? `model: ${file.modelVersion}` : file.mode === "degraded" ? "model partly failed; rules used" : file.mode === "mock" ? "mock model" : "rules only"}</span>}
+                      {done && <span className="chip plain">{file.mode === "live" ? `model: ${file.modelVersion}` : file.mode === "degraded" ? "model partly failed; rules used" : file.mode === "mock" ? "mock model" : "rules only"}</span>}
+                    </div>
                   </div>
                   <label className="small" style={{ display: "grid", gap: 4, minWidth: 190 }}>
                     <span className="muted">Reviewing as</span>
