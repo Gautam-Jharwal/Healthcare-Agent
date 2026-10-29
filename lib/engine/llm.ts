@@ -190,7 +190,6 @@ export async function callModelJSON<T>(ctx: RunCtx, c: ModelCall<T>): Promise<T>
       if (e instanceof ModelBusy) {
         // Not cached as dead: it will probably answer again in a minute.
         lastErr = `model ${model} busy (${e.message})`;
-        ctx.calls.push({ agent: c.agent, purpose: c.purpose, model, ok: false, ms: Date.now() - started, error: lastErr });
         continue;
       }
       lastErr = e instanceof Error ? (e.name === "AbortError" ? "timeout" : e.message) : "unknown_error";
