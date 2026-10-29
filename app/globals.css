@@ -241,14 +241,22 @@ p { margin: 0; }
 /* ---------------- workbench grid ---------------- */
 .bench { display: grid; grid-template-columns: 290px minmax(0, 1fr) 370px; gap: 0; min-height: calc(100vh - 220px); }
 .bench > section { min-width: 0; }
-/* Collapsing the queue gives the case file its full width, so long values
-   wrap as prose instead of into a column one word wide. */
+/* Either side panel can be collapsed, which gives the case file its full
+   width so long values wrap as prose instead of into a column one word wide. */
 .bench.cases-hidden { grid-template-columns: minmax(0, 1fr) 370px; }
+.bench.trace-hidden { grid-template-columns: 290px minmax(0, 1fr); }
+.bench.cases-hidden.trace-hidden { grid-template-columns: minmax(0, 1fr); }
 .bench.cases-hidden .col-left { display: none; }
-.col-head-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.show-cases { align-self: flex-start; margin-bottom: 12px; }
+.bench.trace-hidden .col-trace { display: none; }
+.col-head-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.panel-restore { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 @media (max-width: 1240px) {
   .bench.cases-hidden { grid-template-columns: minmax(0, 1fr); }
+  .bench.trace-hidden { grid-template-columns: 270px minmax(0, 1fr); }
+  .bench.cases-hidden.trace-hidden { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 820px) {
+  .bench.trace-hidden, .bench.cases-hidden, .bench.cases-hidden.trace-hidden { grid-template-columns: 1fr; }
 }
 .col-left { border-right: 1px solid var(--rule); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 .col-main { padding: 18px 22px 60px; display: flex; flex-direction: column; gap: 16px; }
