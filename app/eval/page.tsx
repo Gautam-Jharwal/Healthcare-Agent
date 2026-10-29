@@ -11,7 +11,7 @@ const SHORT: Record<string, string> = {
   patient: "Patient", reporter: "Reporter", event_term: "Event", suspect_drug: "Suspect", onset_date: "Onset", seriousness: "Serious", outcome: "Outcome",
   dose: "Dose", therapy_start: "Start", therapy_stop: "Stop", dechallenge: "Dechal.", rechallenge: "Rechal.", relevant_lab: "Labs", concomitant: "Concom.",
 };
-const SET_LABEL: Record<string, string> = { core: "Demo cases", stress: "Stress cases", heldout: "Held-out cases" };
+const SET_LABEL: Record<string, string> = { core: "Demo cases", stress: "Edge cases", heldout: "Held-out cases" };
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 1000) / 10}%` : "n/a");
 
 export default function EvalPage() {
