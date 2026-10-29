@@ -29,6 +29,20 @@ const TRICKS: { label: string; text: string; hint: string }[] = [
 
 const BLANK: DraftDoc = { kind: "physician_note", title: "", text: "" };
 
+/**
+ * A guess at the document type from its file name, so a whole case folder can
+ * be dropped in at once. Returns null when the name says nothing, in which
+ * case whatever the reviewer already chose in that slot is kept.
+ */
+function kindFromName(name: string): DocKind | null {
+  const n = name.toLowerCase();
+  if (/lab|biochem|h[ae]emat|patholog|blood|serum|bloods/.test(n)) return "lab_report";
+  if (/diary|self[_ -]?report|journal/.test(n)) return "patient_diary";
+  if (/form|cioms|yellow/.test(n)) return "ae_form";
+  if (/note|physician|investigator|clinic|discharge|consult/.test(n)) return "physician_note";
+  return null;
+}
+
 function download(name: string, content: string, type: string) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([content], { type }));
@@ -251,21 +265,58 @@ export default function Workbench() {
     run({ uploaded: usable });
   }
 
-  async function loadFile(i: number, f: File) {
-    setLoadingFile(i); setFileMsg(null);
-    try {
-      if (f.size > 8 * 1024 * 1024) throw new Error("That file is over 8 MB. Use a smaller extract.");
-      let pages: string[];
-      if (/\.pdf$/i.test(f.name) || f.type === "application/pdf") pages = await pdfToPages(f);
-      else pages = [await f.text()];
-      if (!pages.join("").trim()) throw new Error("No text layer found. This looks like a scanned PDF; OCR is outside this demo, so paste the text instead.");
-      setDocs((ds) => ds.map((d, j) => (j === i ? { ...d, pages: pages.length > 1 ? pages : undefined, text: pages.join("\n\n"), fileName: f.name, title: d.title || f.name.replace(/\.[^.]+$/, "") } : d)));
-      setFileMsg(`Read ${pages.length} page(s) from ${f.name}.`);
-    } catch (e) {
-      setFileMsg(e instanceof Error ? e.message : "Could not read that file.");
-    } finally {
-      setLoadingFile(null);
+  async function readDoc(f: File): Promise<string[]> {
+    if (f.size > 8 * 1024 * 1024) throw new Error(`${f.name} is over 8 MB. Use a smaller extract.`);
+    const pages =
+      /\.pdf$/i.test(f.name) || f.type === "application/pdf" ? await pdfToPages(f) : [await f.text()];
+    if (!pages.join("").trim())
+      throw new Error(`No text layer found in ${f.name}. This looks like a scanned PDF; OCR is outside this demo, so paste the text instead.`);
+    return pages;
+  }
+
+  /**
+   * Reads one or more files into consecutive document slots, starting at `start`
+   * and creating slots as needed up to the four the bundle allows. One bad file
+   * does not lose the others: each is reported on its own.
+   */
+  async function loadFiles(start: number, list: FileList) {
+    const files = Array.from(list).slice(0, 4 - start);
+    if (!files.length) return;
+    setLoadingFile(start); setFileMsg(null);
+
+    const loaded: { file: File; pages: string[] }[] = [];
+    const failed: string[] = [];
+    for (const f of files) {
+      try { loaded.push({ file: f, pages: await readDoc(f) }); }
+      catch (e) { failed.push(e instanceof Error ? e.message : `Could not read ${f.name}.`); }
     }
+
+    if (loaded.length) {
+      setDocs((ds) => {
+        const next = [...ds];
+        while (next.length < Math.min(4, start + loaded.length)) next.push({ ...BLANK });
+        loaded.forEach(({ file, pages }, k) => {
+          const i = start + k;
+          if (i > 3) return;
+          const base = next[i] ?? { ...BLANK };
+          next[i] = {
+            ...base,
+            kind: kindFromName(file.name) ?? base.kind,
+            pages: pages.length > 1 ? pages : undefined,
+            text: pages.join("\n\n"),
+            fileName: file.name,
+            title: base.title || file.name.replace(/\.[^.]+$/, ""),
+          };
+        });
+        return next.slice(0, 4);
+      });
+    }
+
+    const ok = loaded.length
+      ? `Read ${loaded.map((l) => `${l.file.name} (${l.pages.length} page(s))`).join(", ")}.`
+      : "";
+    setFileMsg([ok, ...failed].filter(Boolean).join(" ") || "Could not read those files.");
+    setLoadingFile(null);
   }
 
   function startEdit(f: ExtractedField) {
@@ -370,6 +421,13 @@ export default function Workbench() {
           {composing && (
             <div className="composer">
               <p className="small muted">Paste or load up to four synthetic documents for one case. Do not use real patient data. Text and text-based PDFs are read in your browser; scanned PDFs need OCR, which this demo does not do.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "10px 0 4px" }}>
+                <label className="file-label">
+                  {loadingFile === 0 ? "Reading…" : "Load the whole case — select several files at once"}
+                  <input className="sr-only" type="file" multiple accept=".pdf,.txt,.md,text/plain,application/pdf" onChange={(e) => e.target.files?.length && loadFiles(0, e.target.files)} />
+                </label>
+                <span className="small muted">The document type is guessed from the file name. Change it below if the guess is wrong.</span>
+              </div>
               {docs.map((d, i) => (
                 <div className="doc-block" key={i}>
                   <div className="row">
@@ -387,8 +445,8 @@ export default function Workbench() {
                   />
                   <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
                     <label className="file-label">
-                      {loadingFile === i ? "Reading…" : d.fileName ? `Loaded ${d.fileName}` : "Load a .pdf or .txt file"}
-                      <input className="sr-only" type="file" accept=".pdf,.txt,.md,text/plain,application/pdf" onChange={(e) => e.target.files?.[0] && loadFile(i, e.target.files[0])} />
+                      {loadingFile === i ? "Reading…" : d.fileName ? `Loaded ${d.fileName}` : "Load .pdf or .txt files"}
+                      <input className="sr-only" type="file" multiple accept=".pdf,.txt,.md,text/plain,application/pdf" onChange={(e) => e.target.files?.length && loadFiles(i, e.target.files)} />
                     </label>
                     <span className="small muted">{(d.pages?.join("") ?? d.text).length.toLocaleString()} chars</span>
                   </div>
@@ -430,6 +488,7 @@ export default function Workbench() {
           {!file && !running && (
             <div className="empty">
               <h2>Pick a case to run the agents</h2>
+              <p>Start with IN-2026-0392 for the clean path, then IN-2026-0433 to watch SURE refuse to draft, adjudicate the conflict, and resume. The stress cases test fatal outcomes, a Hinglish diary, an embedded prompt injection, a follow-up report and a missing reporter.</p>
             </div>
           )}
 
