@@ -47,6 +47,7 @@ export default function Header({ current, runMode }: { current: "home" | "overvi
     ["/", "Home", "home"],
     ["/overview", "Overview", "overview"],
     ["/demo", "Analysis", "demo"],
+    ["/eval", "Evaluation", "eval"],
   ];
 
   return (
