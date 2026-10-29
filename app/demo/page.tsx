@@ -119,7 +119,7 @@ export default function Workbench() {
   const groups = useMemo(
     () => [
       { title: "Demo cases", cases: CORE_CASES },
-      { title: "Stress cases a judge might try", cases: STRESS_CASES },
+      { title: "Edge cases", cases: STRESS_CASES },
       ...(HELDOUT_CASES.length ? [{ title: "Held-out cases", cases: HELDOUT_CASES }] : []),
     ],
     [],
