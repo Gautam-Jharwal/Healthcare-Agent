@@ -120,7 +120,6 @@ export default function EvalPage() {
             <li><b>Route</b>: whether it drafted, escalated a critical conflict, or held an invalid case, as the reference expects.</li>
             <li><b>Narrative</b>: claims in the drafted narrative checked against verified fields; any unsupported claim means the draft is rejected.</li>
           </ul>
-          <p className="small muted" style={{ marginTop: 10 }}>Command line: <code>npx tsx scripts/eval.ts</code> (no server) or <code>python3 eval/run_eval.py</code> against a running app.</p>
         </section>
       </main>
     </>
