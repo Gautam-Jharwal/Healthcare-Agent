@@ -503,8 +503,7 @@ export default function Workbench() {
                       {file.riskRank && <span className={`chip lvl-${file.riskRank.level}`}>{file.riskRank.level}</span>}
                       {file.route && <span className={`chip ${file.route === "draft" ? "st-sourced" : file.route === "escalate" ? "st-conflict" : "st-gap"}`}>{file.route === "draft" ? "drafted" : file.route === "escalate" ? "escalated" : "held for follow-up"}</span>}
                       {Object.keys(applied).length > 0 && <span className="chip st-human">{Object.keys(applied).length} reviewer decision(s)</span>}
-                      {done && <span className="chip plain">{file.mode === "live" ? `model: ${file.modelVersion}` : file.mode === "degraded" ? "model partly failed; rules used" : file.mode === "mock" ? "mock model" : "rules only"}</span>}
-                    </div>
+                      {done && file.mode === "live" && <span className="chip plain">model: {file.modelVersion}</span>}
                   </div>
                   <label className="small" style={{ display: "grid", gap: 4, minWidth: 190 }}>
                     <span className="muted">Reviewing as</span>
