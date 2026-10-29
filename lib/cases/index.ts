@@ -421,6 +421,563 @@ not be read reliably. Values on this page must not be inferred.]`,
       expectedFlags: ["hys_law", "unreadable_page"],
     },
   },
+
+  /* ------------------------------------------------------------------ *
+   * CASE D — anaphylaxis to polyvalent anti-snake venom at a rural PHC.
+   * Life-threatening, so the shortest expedited clock applies.
+   * ------------------------------------------------------------------ */
+  {
+    id: "IN-2026-0481",
+    label: "Anaphylaxis to anti-snake venom",
+    blurb: "Life-threatening reaction at a rural primary health centre. Shows the shortest reporting clock and a positive dechallenge.",
+    set: "core",
+    documents: [
+      {
+        id: "doc-0481-1",
+        kind: "physician_note",
+        title: "Clinical note — Primary Health Centre, Wardha",
+        received: "2026-05-13T11:05:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `CLINICAL NOTE — Primary Health Centre, Wardha District, Maharashtra
+Patient code: SYN-318-0042. Male, 29 years. Weight 58 kg.
+Reporter: Treating physician, Primary Health Centre, Wardha District.
+
+Indication: haemotoxic envenomation following a snakebite to the right foot,
+sustained while working in a paddy field.
+
+Suspect product: Polyvalent anti-snake venom 100 mL intravenous, as required.
+Therapy start: 11 May 2026. Therapy stop: 11 May 2026.
+
+Narrative: Reconstituted lyophilised polyvalent anti-snake venom was started as
+an intravenous infusion at 14:20. Approximately eighteen minutes into the
+infusion the patient developed generalised wheeze, periorbital swelling and
+hypotension with a recorded blood pressure of 78/50 mmHg,
+first noticed on 11 May 2026.
+The treating physician recorded the reaction as life-threatening.
+
+The infusion was stopped immediately. Intramuscular adrenaline 0.5 mg was
+given, followed by intravenous hydrocortisone and chlorpheniramine with fluid
+resuscitation. Blood pressure returned to normal within twenty minutes and the
+wheeze abated. The patient was admitted overnight for observation and was
+discharged on 13 May 2026.
+
+Rechallenge was not attempted.
+
+Outcome: recovered.
+
+Assessment: anaphylaxis, considered by the treating physician to be related to
+polyvalent anti-snake venom.
+
+Concomitant medication: tetanus toxoid 0.5 mL intramuscular, single dose.
+Relevant medical history: no previous exposure to anti-snake venom. No known
+drug allergies.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0481-2",
+        kind: "lab_report",
+        title: "Laboratory report — 11 May 2026",
+        received: "2026-05-13T11:05:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `LABORATORY REPORT
+Patient code: SYN-318-0042   Sample type: Whole blood
+Date of collection: 11 May 2026   Date of report: 11 May 2026
+
+Coagulation
+  Prothrombin time   22.4 s         (ref 11.0 - 13.5)   HIGH
+  INR                1.9            (ref 0.8 - 1.2)     HIGH
+
+Complete Blood Count
+  Haemoglobin        13.1 g/dL      (ref 13.0 - 17.0)
+  Platelet count     164,000 /uL    (ref 150,000 - 450,000)
+  Total WBC count    9,800 /uL      (ref 4,000 - 11,000)
+
+Comment: coagulopathy consistent with haemotoxic envenomation.`,
+          },
+        ],
+      },
+    ],
+    reference: {
+      fields: {
+        patient: ["SYN-318-0042"],
+        reporter: ["wardha"],
+        event_term: ["anaphylaxis"],
+        onset_date: "2026-05-11",
+        suspect_drug: ["anti-snake venom"],
+        dose: ["100 mL", "intravenous"],
+        therapy_start: "2026-05-11",
+        therapy_stop: "2026-05-11",
+        dechallenge: ["positive"],
+        rechallenge: ["not performed"],
+        seriousness: ["serious", "life-threatening", "hospitalisation"],
+        outcome: ["recovered"],
+        relevant_lab: ["prothrombin", "22.4"],
+        concomitant: ["tetanus toxoid"],
+      },
+      expectedGaps: [],
+      expectedRoute: "draft",
+      expectedRisk: "urgent",
+      expectedValid: true,
+      expectedFlags: ["fatal_or_life_threatening", "lab_alert"],
+    },
+  },
+
+  /* ------------------------------------------------------------------ *
+   * CASE E — metformin-associated lactic acidosis in a patient whose
+   * renal function had fallen. An unlabelled ayurvedic preparation is
+   * recorded as concomitant, which is a real confounder in Indian practice.
+   * ------------------------------------------------------------------ */
+  {
+    id: "IN-2026-0487",
+    label: "Lactic acidosis on metformin",
+    blurb: "Hospitalised diabetic with falling renal function. Shows laboratory values driving the narrative, with an unlabelled herbal co-medication recorded.",
+    set: "core",
+    documents: [
+      {
+        id: "doc-0487-1",
+        kind: "physician_note",
+        title: "Clinical note — Department of Medicine, Jaipur",
+        received: "2026-05-29T07:40:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `CLINICAL NOTE — Department of Medicine, Jaipur
+Patient code: SYN-407-0115. Female, 62 years. Weight 54 kg.
+Reporter: Treating physician, Department of Medicine, Jaipur.
+
+Indication: type 2 diabetes mellitus of eleven years' duration.
+
+Suspect product: Metformin 1000 mg oral, twice daily.
+Therapy start: 14 August 2023. Therapy stop: 24 May 2026.
+
+Narrative: The patient presented to the emergency department on 24 May 2026
+with three days of nausea, vomiting, abdominal pain and deep laboured
+breathing. Symptoms were first noticed on 21 May 2026 according to the
+attendant. She had continued metformin through an episode of acute
+gastroenteritis with reduced oral intake.
+
+Arterial blood gas on admission showed a severe metabolic acidosis with an
+elevated serum lactate. Serum creatinine was raised above her documented
+baseline of 1.1 mg/dL. She was admitted to the intensive care unit and treated
+with intravenous fluids, bicarbonate and a single session of haemodialysis.
+
+Metformin was withdrawn on admission. The acidosis resolved after withdrawal
+and supportive treatment, and lactate returned to normal by 27 May 2026.
+
+Rechallenge was not attempted.
+
+Outcome: recovered.
+
+Assessment: lactic acidosis, considered by the treating physician to be
+related to metformin in the setting of acute kidney injury from dehydration.
+
+Concomitant medication: telmisartan 40 mg oral, once daily; an unlabelled
+ayurvedic preparation for diabetes taken for about four months, brand and
+composition not known to the patient.
+Relevant medical history: hypertension. No known drug allergies.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0487-2",
+        kind: "lab_report",
+        title: "Laboratory report — 24 May 2026",
+        received: "2026-05-29T07:40:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `LABORATORY REPORT
+Patient code: SYN-407-0115   Sample type: Arterial blood / Serum
+Date of collection: 24 May 2026   Date of report: 24 May 2026
+
+Arterial blood gas
+  pH                 7.08           (ref 7.35 - 7.45)   LOW
+  Bicarbonate        8.2 mmol/L     (ref 22.0 - 28.0)   LOW
+  Lactate            11.4 mmol/L    (ref 0.5 - 2.2)     HIGH
+
+Renal profile
+  Serum creatinine   3.4 mg/dL      (ref 0.6 - 1.1)     HIGH
+  Blood urea         88 mg/dL       (ref 15 - 40)       HIGH
+  Potassium          5.4 mmol/L     (ref 3.5 - 5.1)     HIGH
+
+Comment: high anion gap metabolic acidosis with hyperlactataemia and acute
+renal impairment.`,
+          },
+        ],
+      },
+    ],
+    reference: {
+      fields: {
+        patient: ["SYN-407-0115"],
+        reporter: ["jaipur"],
+        event_term: ["lactic acidosis"],
+        // The attendant's account gives the first symptom; the presentation
+        // date of 24 May is when she reached hospital, not when it began.
+        onset_date: "2026-05-21",
+        suspect_drug: ["metformin"],
+        dose: ["1000 mg", "twice daily"],
+        therapy_start: "2023-08-14",
+        therapy_stop: "2026-05-24",
+        dechallenge: ["positive"],
+        rechallenge: ["not performed"],
+        seriousness: ["serious", "hospitalisation"],
+        outcome: ["recovered"],
+        relevant_lab: ["lactate", "11.4"],
+        concomitant: ["telmisartan", "ayurvedic"],
+      },
+      expectedGaps: [],
+      expectedRoute: "draft",
+      expectedRisk: "urgent",
+      expectedValid: true,
+    },
+  },
+
+  /* ------------------------------------------------------------------ *
+   * CASE F — a medication use error. Weekly methotrexate was taken daily.
+   * The prescription and the patient's own diary disagree about frequency,
+   * which is exactly the kind of discrepancy a case processor must catch.
+   * ------------------------------------------------------------------ */
+  {
+    id: "IN-2026-0493",
+    label: "Agranulocytosis after a methotrexate dosing error",
+    blurb: "Weekly methotrexate taken daily. Shows a use error surfaced from the patient's own diary against the prescription.",
+    set: "core",
+    documents: [
+      {
+        id: "doc-0493-1",
+        kind: "physician_note",
+        title: "Clinical note — Rheumatology, Lucknow",
+        received: "2026-06-08T13:20:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `CLINICAL NOTE — Rheumatology Unit, Lucknow
+Patient code: SYN-512-0238. Female, 47 years. Weight 49 kg.
+Reporter: Treating physician, Rheumatology Unit, Lucknow.
+
+Indication: seropositive rheumatoid arthritis.
+
+Suspect product: Methotrexate 7.5 mg oral, once daily.
+Therapy start: 18 May 2026. Therapy stop: 03 June 2026.
+
+Narrative: Methotrexate was prescribed at 7.5 mg once weekly. The patient
+understood the instruction as a daily dose and took 7.5 mg every day for
+seventeen days. She presented on 03 June 2026 with fever, painful oral
+ulceration and bleeding gums, first noticed on 01 June 2026.
+
+Blood counts on admission showed profound neutropenia with thrombocytopenia.
+She was admitted to a protective isolation bed and treated with folinic acid
+rescue, broad-spectrum antibiotics and granulocyte colony-stimulating factor.
+
+Methotrexate was stopped on admission. Counts improved after withdrawal, with
+the neutrophil count recovering by 09 June 2026.
+
+Rechallenge was not attempted.
+
+Outcome: recovering.
+
+Assessment: agranulocytosis, considered by the treating physician to be
+related to methotrexate taken at the wrong frequency. This is recorded as a
+medication use error rather than a product quality complaint.
+
+Concomitant medication: folic acid 5 mg oral, once daily.
+Relevant medical history: rheumatoid arthritis for six years. No known drug
+allergies.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0493-2",
+        kind: "patient_diary",
+        title: "Patient diary extract",
+        received: "2026-06-08T13:20:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `MY MEDICINE DIARY — SYN-512-0238
+
+18 May — Started the new yellow tablet. One tablet after breakfast.
+19 May — One tablet after breakfast.
+20 May — One tablet after breakfast. Mouth feels a little dry.
+25 May — Still taking one tablet every morning. Joints are better.
+29 May — Taking one tablet daily as before. Feeling tired.
+01 Jun — Mouth ulcers since this morning and gums bled when brushing. Fever.
+02 Jun — Ulcers worse, could not eat. Fever continues.
+03 Jun — Went to hospital. Doctor asked how many tablets I was taking and said
+it should have been only one tablet in a week, not every day.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0493-3",
+        kind: "lab_report",
+        title: "Laboratory report — 03 Jun 2026",
+        received: "2026-06-08T13:25:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `LABORATORY REPORT
+Patient code: SYN-512-0238   Sample type: Whole blood
+Date of collection: 03 June 2026   Date of report: 03 June 2026
+
+Complete Blood Count
+  Haemoglobin        9.4 g/dL       (ref 12.0 - 16.0)    LOW
+  Total WBC count    1,100 /uL      (ref 4,000 - 11,000) LOW
+  Neutrophils        180 /uL        (ref 2,000 - 7,000)  LOW
+  Platelet count     38,000 /uL     (ref 150,000 - 450,000) LOW
+
+Liver Function Test
+  ALT (SGPT)         46 U/L         (ref 0 - 40)         HIGH
+  Total bilirubin    0.9 mg/dL      (ref 0.2 - 1.2)
+
+Comment: severe neutropenia with thrombocytopenia. Pancytopenic picture
+consistent with antifolate toxicity.`,
+          },
+        ],
+      },
+    ],
+    reference: {
+      fields: {
+        patient: ["SYN-512-0238"],
+        reporter: ["lucknow"],
+        event_term: ["agranulocytosis"],
+        onset_date: "2026-06-01",
+        suspect_drug: ["methotrexate"],
+        // The prescription was weekly; the dose actually taken was daily.
+        // The field records what the patient took, which is the use error.
+        dose: ["7.5 mg", "once daily"],
+        therapy_start: "2026-05-18",
+        therapy_stop: "2026-06-03",
+        dechallenge: ["positive"],
+        rechallenge: ["not performed"],
+        seriousness: ["serious", "hospitalisation"],
+        outcome: ["recovering"],
+        relevant_lab: ["neutrophils", "180"],
+        concomitant: ["folic acid"],
+      },
+      expectedGaps: [],
+      expectedRoute: "draft",
+      expectedRisk: "urgent",
+      expectedValid: true,
+      expectedFlags: ["severe_thrombocytopenia"],
+    },
+  },
+
+  /* ------------------------------------------------------------------ *
+   * CASE G — amphotericin B nephrotoxicity during treatment for
+   * rhino-orbital mucormycosis. The injury is visible only in the
+   * laboratory trend, not in the narrative.
+   * ------------------------------------------------------------------ */
+  {
+    id: "IN-2026-0499",
+    label: "Acute kidney injury on amphotericin B",
+    blurb: "Renal injury during antifungal treatment, evident in the creatinine trend rather than the narrative. Shows laboratory-led detection.",
+    set: "core",
+    documents: [
+      {
+        id: "doc-0499-1",
+        kind: "physician_note",
+        title: "Clinical note — Infectious Diseases, Ahmedabad",
+        received: "2026-06-22T09:15:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `CLINICAL NOTE — Infectious Diseases Unit, Ahmedabad
+Patient code: SYN-620-0471. Male, 54 years. Weight 71 kg.
+Reporter: Treating physician, Infectious Diseases Unit, Ahmedabad.
+
+Indication: rhino-orbital mucormycosis in a patient with poorly controlled
+type 2 diabetes mellitus.
+
+Suspect product: Amphotericin B deoxycholate 50 mg intravenous, once daily.
+Therapy start: 02 June 2026. Therapy stop: 16 June 2026.
+
+Narrative: The patient was already admitted for surgical debridement when
+amphotericin B deoxycholate was started on 02 June 2026. Renal function was
+normal at baseline with a serum creatinine of 0.9 mg/dL.
+
+Serum creatinine rose progressively over the second week of treatment and
+reached 2.8 mg/dL on 16 June 2026, first noticed on 14 June 2026 when the
+twice-weekly panel was reviewed. Urine output fell and the patient required
+potassium and magnesium replacement. The admission was prolonged by this event.
+
+Amphotericin B deoxycholate was withdrawn on 16 June 2026 and treatment was
+switched to posaconazole. Creatinine improved after withdrawal and had fallen
+to 1.4 mg/dL by 21 June 2026.
+
+Rechallenge was not attempted.
+
+Outcome: recovering.
+
+Assessment: acute kidney injury, considered by the treating physician to be
+related to amphotericin B deoxycholate.
+
+Concomitant medication: insulin glargine 18 units subcutaneous, once daily;
+posaconazole 300 mg oral, once daily from 16 June 2026.
+Relevant medical history: type 2 diabetes mellitus. No known drug allergies.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0499-2",
+        kind: "lab_report",
+        title: "Laboratory report — 16 Jun 2026",
+        received: "2026-06-22T09:20:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `LABORATORY REPORT
+Patient code: SYN-620-0471   Sample type: Serum
+Date of collection: 16 June 2026   Date of report: 16 June 2026
+
+Renal profile
+  Serum creatinine   2.8 mg/dL      (ref 0.6 - 1.3)      HIGH
+  Blood urea         74 mg/dL       (ref 15 - 40)        HIGH
+  Potassium          2.9 mmol/L     (ref 3.5 - 5.1)      LOW
+  Magnesium          1.3 mg/dL      (ref 1.7 - 2.4)      LOW
+
+Complete Blood Count
+  Haemoglobin        10.6 g/dL      (ref 13.0 - 17.0)    LOW
+  Platelet count     212,000 /uL    (ref 150,000 - 450,000)
+
+Comment: progressive rise in creatinine with hypokalaemia and
+hypomagnesaemia, a pattern typical of amphotericin B tubular toxicity.`,
+          },
+        ],
+      },
+    ],
+    reference: {
+      fields: {
+        patient: ["SYN-620-0471"],
+        reporter: ["ahmedabad"],
+        event_term: ["acute kidney injury"],
+        onset_date: "2026-06-14",
+        suspect_drug: ["amphotericin"],
+        dose: ["50 mg", "intravenous"],
+        therapy_start: "2026-06-02",
+        therapy_stop: "2026-06-16",
+        dechallenge: ["positive"],
+        rechallenge: ["not performed"],
+        seriousness: ["serious", "hospitalisation"],
+        outcome: ["recovering"],
+        relevant_lab: ["creatinine", "2.8"],
+        concomitant: ["insulin glargine"],
+      },
+      expectedGaps: [],
+      expectedRoute: "draft",
+      expectedRisk: "urgent",
+      expectedValid: true,
+    },
+  },
+
+  /* ------------------------------------------------------------------ *
+   * CASE H — a non-serious finding picked up on a routine ECG. Nothing
+   * dramatic happens, which is the point: it must land in the routine
+   * queue with no expedited clock.
+   * ------------------------------------------------------------------ */
+  {
+    id: "IN-2026-0505",
+    label: "QT prolongation on azithromycin",
+    blurb: "Asymptomatic finding on a routine ECG, resolving after withdrawal. Shows a non-serious case landing in the routine queue with no expedited clock.",
+    set: "core",
+    documents: [
+      {
+        id: "doc-0505-1",
+        kind: "physician_note",
+        title: "Clinical note — General Medicine OPD, Chennai",
+        received: "2026-07-06T10:30:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `CLINICAL NOTE — General Medicine OPD, Chennai
+Patient code: SYN-714-0356. Female, 38 years. Weight 63 kg.
+Reporter: Treating physician, General Medicine OPD, Chennai.
+
+Indication: community-acquired lower respiratory tract infection.
+
+Suspect product: Azithromycin 500 mg oral, once daily.
+Therapy start: 28 June 2026. Therapy stop: 01 July 2026.
+
+Narrative: A routine twelve-lead electrocardiogram performed on 01 July 2026
+before a planned dental procedure showed a corrected QT interval of 486 ms,
+prolonged from a documented baseline of 412 ms recorded in March 2026. The
+finding was first noticed on 01 July 2026 and was asymptomatic throughout. The
+patient reported no palpitations, no syncope and no dizziness.
+
+Azithromycin was stopped on 01 July 2026 as a precaution. A repeat
+electrocardiogram on 05 July 2026 showed the corrected QT interval had
+returned to normal at 418 ms. The event did not require hospitalisation and
+was not considered life-threatening by the treating physician.
+
+Rechallenge was not attempted.
+
+Outcome: recovered.
+
+Assessment: QT prolongation, considered by the treating physician to be
+possibly related to azithromycin. Non-serious.
+
+Concomitant medication: none.
+Relevant medical history: none reported. No known drug allergies. No family
+history of sudden cardiac death.`,
+          },
+        ],
+      },
+      {
+        id: "doc-0505-2",
+        kind: "lab_report",
+        title: "Laboratory report — 01 Jul 2026",
+        received: "2026-07-06T10:35:00Z",
+        pages: [
+          {
+            n: 1,
+            text: `LABORATORY REPORT
+Patient code: SYN-714-0356   Sample type: Serum
+Date of collection: 01 July 2026   Date of report: 01 July 2026
+
+Electrolytes
+  Potassium          4.1 mmol/L     (ref 3.5 - 5.1)
+  Magnesium          2.0 mg/dL      (ref 1.7 - 2.4)
+  Corrected calcium  9.2 mg/dL      (ref 8.6 - 10.2)
+
+Complete Blood Count
+  Haemoglobin        12.6 g/dL      (ref 12.0 - 16.0)
+  Total WBC count    7,400 /uL      (ref 4,000 - 11,000)
+
+Comment: electrolytes within reference limits. No metabolic cause for QT
+prolongation identified.`,
+          },
+        ],
+      },
+    ],
+    reference: {
+      fields: {
+        patient: ["SYN-714-0356"],
+        reporter: ["chennai"],
+        event_term: ["qt prolongation"],
+        onset_date: "2026-07-01",
+        suspect_drug: ["azithromycin"],
+        dose: ["500 mg", "once daily"],
+        therapy_start: "2026-06-28",
+        therapy_stop: "2026-07-01",
+        dechallenge: ["positive"],
+        rechallenge: ["not performed"],
+        seriousness: ["non-serious"],
+        outcome: ["recovered"],
+        // The panel was run and was normal. That is a result, not a gap.
+        relevant_lab: ["no abnormal values"],
+        concomitant: ["none"],
+      },
+      expectedGaps: [],
+      expectedRoute: "draft",
+      expectedRisk: "routine",
+      expectedValid: true,
+    },
+  },
 ];
 
 export const STRESS_CASES: CaseBundle[] = [
