@@ -53,10 +53,7 @@ export default function Home() {
             </li>
           </ul>
 
-          <p className="home-foot">
-            Demonstration build for ABHIKALP 2026 · Team Product Avengers. All cases are
-            synthetic. Not for clinical or regulatory use.
-          </p>
+          
         </div>
       </main>
     </>
