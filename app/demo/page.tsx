@@ -127,6 +127,7 @@ export default function Workbench() {
   const [selected, setSelected] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
   const [casesHidden, setCasesHidden] = useState(false);
+  const [traceHidden, setTraceHidden] = useState(false);
   const [docs, setDocs] = useState<DraftDoc[]>([{ ...BLANK }]);
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [loadingFile, setLoadingFile] = useState<number | null>(null);
@@ -340,7 +341,7 @@ export default function Workbench() {
       <Header current="demo" runMode={runMode} />
       <Pipeline states={pipe.states} route={routing?.chose ?? null} running={pipe.running} loops={{ extract: extractLoop, draft: draftLoop }} caption="Agent graph for the current run" />
 
-      <main className={casesHidden ? "bench cases-hidden" : "bench"}>
+      <main className={`bench${casesHidden ? " cases-hidden" : ""}${traceHidden ? " trace-hidden" : ""}`}>
         {/* ------------------------------------------------ left: queue */}
         <section className="col-left" aria-label="Cases">
           <div className="col-head">
@@ -414,10 +415,15 @@ export default function Workbench() {
 
         {/* ------------------------------------------------ centre: case file */}
         <section className="col-main" aria-label="Case file">
-          {casesHidden && (
-            <button className="btn sm ghost show-cases" onClick={() => setCasesHidden(false)}>
-              Show cases
-            </button>
+          {(casesHidden || traceHidden) && (
+            <div className="panel-restore">
+              {casesHidden && (
+                <button className="btn sm ghost" onClick={() => setCasesHidden(false)}>Show cases</button>
+              )}
+              {traceHidden && (
+                <button className="btn sm ghost" onClick={() => setTraceHidden(false)}>Show agent trace</button>
+              )}
+            </div>
           )}
           {error && <div className="banner esc" role="alert"><span className="ic" aria-hidden>!</span><h3>{error}</h3></div>}
 
@@ -692,7 +698,13 @@ export default function Workbench() {
 
         {/* ------------------------------------------------ right: trace */}
         <section className="col-trace" aria-label="Agent trace" aria-live="polite">
-          <div className="col-head"><h2>Agent trace</h2>{running && <span className="small muted">running…</span>}</div>
+          <div className="col-head">
+            <h2>Agent trace</h2>
+            <span className="col-head-actions">
+              {running && <span className="small muted">running…</span>}
+              <button className="btn sm ghost" onClick={() => setTraceHidden(true)} title="Give the case file more width">Hide</button>
+            </span>
+          </div>
           {!trace.length && !running && <p className="small muted">Each agent’s tool calls, timing and the stop condition it checked appear here as it runs.</p>}
           {trace.map((t, i) => (
             <div key={`${t.seq}-${i}`}>
