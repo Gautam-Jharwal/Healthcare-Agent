@@ -126,6 +126,7 @@ export default function Workbench() {
   );
   const [selected, setSelected] = useState<string | null>(null);
   const [composing, setComposing] = useState(false);
+  const [casesHidden, setCasesHidden] = useState(false);
   const [docs, setDocs] = useState<DraftDoc[]>([{ ...BLANK }]);
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [loadingFile, setLoadingFile] = useState<number | null>(null);
@@ -339,12 +340,15 @@ export default function Workbench() {
       <Header current="demo" runMode={runMode} />
       <Pipeline states={pipe.states} route={routing?.chose ?? null} running={pipe.running} loops={{ extract: extractLoop, draft: draftLoop }} caption="Agent graph for the current run" />
 
-      <main className="bench">
+      <main className={casesHidden ? "bench cases-hidden" : "bench"}>
         {/* ------------------------------------------------ left: queue */}
         <section className="col-left" aria-label="Cases">
           <div className="col-head">
             <h2>{composing ? "Your documents" : "Case queue"}</h2>
-            <button className="btn sm ghost" onClick={() => setComposing((c) => !c)}>{composing ? "Back to cases" : "Add your own"}</button>
+            <span className="col-head-actions">
+              <button className="btn sm ghost" onClick={() => setComposing((c) => !c)}>{composing ? "Back to cases" : "Add your own"}</button>
+              <button className="btn sm ghost" onClick={() => setCasesHidden(true)} title="Give the case file more width">Hide</button>
+            </span>
           </div>
 
           {!composing &&
@@ -410,6 +414,11 @@ export default function Workbench() {
 
         {/* ------------------------------------------------ centre: case file */}
         <section className="col-main" aria-label="Case file">
+          {casesHidden && (
+            <button className="btn sm ghost show-cases" onClick={() => setCasesHidden(false)}>
+              Show cases
+            </button>
+          )}
           {error && <div className="banner esc" role="alert"><span className="ic" aria-hidden>!</span><h3>{error}</h3></div>}
 
           {!file && !running && (
