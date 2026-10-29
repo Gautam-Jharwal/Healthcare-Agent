@@ -430,7 +430,6 @@ export default function Workbench() {
           {!file && !running && (
             <div className="empty">
               <h2>Pick a case to run the agents</h2>
-              <p>Start with IN-2026-0392 for the clean path, then IN-2026-0433 to watch SURE refuse to draft, adjudicate the conflict, and resume. The stress cases test fatal outcomes, a Hinglish diary, an embedded prompt injection, a follow-up report and a missing reporter.</p>
             </div>
           )}
 
