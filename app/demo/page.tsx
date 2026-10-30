@@ -360,6 +360,84 @@ export default function Workbench() {
     download(`SURE_${file.caseId}_E2B-R3-elements.xml`, xml, "application/xml");
     await log(file.caseId, decision.by, "E2B(R3) element export downloaded", `${xml.length.toLocaleString()} bytes. Not transmitted anywhere.`);
   }
+  /**
+   * A human-readable case report, opened in a print window so the browser's
+   * own "Save as PDF" produces the file. The E2B export stays XML: that one is
+   * a machine-to-machine transmission format, not something a person reads.
+   */
+  async function exportReportPDF() {
+    if (!file) return;
+    const esc = (t: unknown) =>
+      String(t ?? "—").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
+    const rows = file.fields
+      .map(
+        (f) => `<tr>
+          <th>${esc(f.label)}${f.critical ? ' <s>*</s>' : ""}</th>
+          <td>${esc(f.value)}${f.note ? `<i>${esc(f.note)}</i>` : ""}</td>
+          <td class="st">${esc(f.status)}</td>
+          <td class="src">${f.citations.map((c) => esc(`${c.docTitle} p.${c.page}`)).join("<br>") || "—"}</td>
+        </tr>`,
+      )
+      .join("");
+    const flags = file.flags.length
+      ? `<ul>${file.flags.map((f) => `<li><b>${esc(f.code)}</b> — ${esc(f.message)}</li>`).join("")}</ul>`
+      : "<p>None.</p>";
+    const html = `<!doctype html><html><head><meta charset="utf-8">
+<title>SURE ${esc(file.caseId)} — case report</title><style>
+@page{size:A4 portrait;margin:16mm 14mm}
+*{box-sizing:border-box}
+body{font-family:Georgia,'Times New Roman',serif;color:#111;font-size:10.5pt;line-height:1.5;margin:0}
+h1{font-size:16pt;margin:0 0 2pt}
+.sub{font-size:8.5pt;color:#555;letter-spacing:.5pt;text-transform:uppercase}
+hr{border:0;border-top:1.5pt solid #111;margin:8pt 0 12pt}
+h2{font-size:10pt;text-transform:uppercase;letter-spacing:1pt;color:#7a4a12;margin:16pt 0 6pt}
+table{width:100%;border-collapse:collapse;font-size:9.5pt}
+th,td{border-bottom:.5pt solid #ccc;padding:5pt 6pt;text-align:left;vertical-align:top}
+th{width:21%;font-weight:700}
+td.st{width:12%;color:#555;text-transform:capitalize}
+td.src{width:27%;font-size:8.5pt;color:#555}
+td i{display:block;font-size:8.5pt;color:#666;margin-top:2pt}
+s{text-decoration:none;color:#b00}
+.grid{display:flex;gap:14pt}
+.grid div{flex:1;border:.5pt solid #ccc;padding:7pt 9pt}
+.grid b{display:block;font-size:8.5pt;text-transform:uppercase;letter-spacing:.5pt;color:#555}
+.grid span{font-size:12pt;font-weight:700}
+.narr{border-left:2pt solid #7a4a12;padding:4pt 0 4pt 10pt;margin-top:4pt}
+.sign{margin-top:14pt;border:.5pt solid #111;padding:9pt 11pt;font-size:9.5pt}
+.foot{margin-top:18pt;border-top:.5pt solid #ccc;padding-top:5pt;font-size:8pt;color:#666}
+ul{margin:0;padding-left:16pt}
+</style></head><body>
+<h1>Individual Case Safety Report — working draft</h1>
+<div class="sub">SURE · Safety Understanding, Risk &amp; Evidence · Case ${esc(file.caseId)}</div>
+<hr>
+<div class="grid">
+  <div><b>Route</b><span>${esc(file.route)}</span></div>
+  <div><b>Queue priority</b><span>${esc(file.riskRank?.level)}</span></div>
+  <div><b>Valid ICSR</b><span>${file.validity ? `${file.validity.criteria.filter((c) => c.met).length} of ${file.validity.criteria.length}` : "—"}</span></div>
+  <div><b>Reporting clock</b><span>${file.clock?.days ? `${file.clock.days} days` : "none"}</span></div>
+</div>
+${file.clock ? `<p style="font-size:9pt;color:#555;margin-top:6pt">${esc(file.clock.rule)}${file.clock.due ? ` · due ${esc(file.clock.due)}` : ""}</p>` : ""}
+<h2>Extracted fields</h2>
+<table><tbody>${rows}</tbody></table>
+<p style="font-size:8.5pt;color:#666;margin-top:5pt"><s>*</s> critical field. A value appears only where its quote was found on the cited page.</p>
+<h2>What the agents noticed</h2>${flags}
+${file.narrative ? `<h2>Narrative</h2><div class="narr">${esc(file.narrative)}</div>${file.narrativeCheck ? `<p style="font-size:8.5pt;color:#666">${file.narrativeCheck.claimsChecked} claims checked, ${file.narrativeCheck.unsupported.length} unsupported.</p>` : ""}` : ""}
+<div class="sign">
+  <b>Reviewer sign-off.</b>
+  ${decision ? `${esc(decision.decision === "approved" ? "Approved" : "Rejected")} by ${esc(decision.by)} on ${esc(new Date(decision.at).toLocaleString())}.${decision.note ? ` Reason: ${esc(decision.note)}` : ""}` : "Not yet signed off."}
+  <br>Causality, expectedness and final seriousness remain the reviewer's assessment, not SURE's.
+</div>
+<div class="foot">Generated ${esc(new Date().toLocaleString())}. Synthetic demonstration data. Not a regulatory submission; SURE transmits nothing.</div>
+</body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) { setFileMsg("Allow pop-ups for this site to produce the PDF."); return; }
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 350);
+    await log(file.caseId, decision?.by ?? (reviewer.trim() || "unnamed"), "Case report opened for PDF export", "Rendered in the browser; nothing transmitted.");
+  }
+
   async function exportAudit() {
     if (!file) return;
     const chain = audit[file.caseId] ?? [];
@@ -488,7 +566,7 @@ export default function Workbench() {
           {!file && !running && (
             <div className="empty">
               <h2>Pick a case to run the agents</h2>
-                            <p>Select a case from the list, or upload your own documents. The nine agents run in sequence, each one citing the exact source line behind every value it extracts.</p>
+              <p>Start with IN-2026-0392 for the clean path, then IN-2026-0433 to watch SURE refuse to draft, adjudicate the conflict, and resume. The stress cases test fatal outcomes, a Hinglish diary, an embedded prompt injection, a follow-up report and a missing reporter.</p>
             </div>
           )}
 
@@ -503,7 +581,7 @@ export default function Workbench() {
                       {file.riskRank && <span className={`chip lvl-${file.riskRank.level}`}>{file.riskRank.level}</span>}
                       {file.route && <span className={`chip ${file.route === "draft" ? "st-sourced" : file.route === "escalate" ? "st-conflict" : "st-gap"}`}>{file.route === "draft" ? "drafted" : file.route === "escalate" ? "escalated" : "held for follow-up"}</span>}
                       {Object.keys(applied).length > 0 && <span className="chip st-human">{Object.keys(applied).length} reviewer decision(s)</span>}
-                      {done && file.mode === "live" && <span className="chip plain">model: {file.modelVersion}</span>}
+                      {done && <span className="chip plain">{file.mode === "live" ? `model: ${file.modelVersion}` : file.mode === "degraded" ? "model partly failed; rules used" : file.mode === "mock" ? "mock model" : "rules only"}</span>}
                     </div>
                   </div>
                   <label className="small" style={{ display: "grid", gap: 4, minWidth: 190 }}>
@@ -727,6 +805,7 @@ export default function Workbench() {
                   )}
                   <div className="row">
                     <button className="btn" onClick={exportE2B} disabled={decision?.decision !== "approved"} title="Available after approval">Download E2B(R3) element export</button>
+                    <button className="btn" onClick={exportReportPDF}>Download case report (PDF)</button>
                     <button className="btn ghost" onClick={exportAudit}>Download audit file</button>
                   </div>
                   <p className="small muted">The export is keyed by ICH E2B(R3) element IDs, with unknowns as nullFlavor and a source page on every value. It is not a schema-valid HL7 message, and SURE never transmits anything.</p>
